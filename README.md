@@ -9,9 +9,9 @@
 - Garanta que o código seja compilável com C++ 98 usando as flags `-Wall -Wextra -Werror`.
 
 **Tarefas:**
-- Criar a estrutura de diretórios e arquivos iniciais (`src`, `include`, `Makefile`, etc.).
-- Implementar a função principal que inicializa o servidor e configura o `socket`.
-- Garantir que o servidor escute em uma porta especificada e aceite conexões.
+- [] Criar a estrutura de diretórios e arquivos iniciais (`src`, `include`, `Makefile`, etc.).
+- [] Implementar a função principal que inicializa o servidor e configura o `socket`.
+- [] Garantir que o servidor escute em uma porta especificada e aceite conexões.
 
 **Critérios de Aceitação:**
 - O projeto deve compilar sem erros.
