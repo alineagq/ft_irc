@@ -17,6 +17,9 @@ jobs:
               with:
                   cpp-version: '98'
 
+            - name: Install gcovr
+              run: sudo apt-get install -y gcovr
+
             - name: Build and run tests
               run: |
                   cd tests
