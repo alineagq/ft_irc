@@ -1,4 +1,6 @@
+#include <iostream>
 
 int main() {
-    return 0;
+    std::cerr << "Error: Tests not implemented yet" << std::endl;
+    return 1;
 }
