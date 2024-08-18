@@ -9,9 +9,9 @@
 - Garanta que o código seja compilável com C++ 98 usando as flags `-Wall -Wextra -Werror`.
 
 **Tarefas:**
-- [] Criar a estrutura de diretórios e arquivos iniciais (`src`, `include`, `Makefile`, etc.).
-- [] Implementar a função principal que inicializa o servidor e configura o `socket`.
-- [] Garantir que o servidor escute em uma porta especificada e aceite conexões.
+- [ ] Criar a estrutura de diretórios e arquivos iniciais (`src`, `include`, `Makefile`, etc.).
+- [ ] Implementar a função principal que inicializa o servidor e configura o `socket`.
+- [ ] Garantir que o servidor escute em uma porta especificada e aceite conexões.
 
 **Critérios de Aceitação:**
 - O projeto deve compilar sem erros.
@@ -24,9 +24,9 @@
 - Permita que clientes configurem seu apelido (nickname) e nome de usuário após a conexão.
 
 **Tarefas:**
-- Adicionar lógica para verificar a senha de conexão.
-- Implementar a configuração de apelido e nome de usuário.
-- Validar que as informações do cliente sejam corretamente armazenadas e utilizadas.
+- [ ] Adicionar lógica para verificar a senha de conexão.
+- [ ] Implementar a configuração de apelido e nome de usuário.
+- [ ] Validar que as informações do cliente sejam corretamente armazenadas e utilizadas.
 
 **Critérios de Aceitação:**
 - O servidor deve autenticar clientes com a senha fornecida.
@@ -40,9 +40,9 @@
 - As mensagens enviadas para um canal devem ser distribuídas para todos os membros do canal.
 
 **Tarefas:**
-- Criar lógica para os clientes se juntarem e saírem de canais.
-- Implementar o envio e recebimento de mensagens de canais.
-- Garantir que as mensagens enviadas por um cliente sejam encaminhadas para todos os clientes no canal.
+- [ ] Criar lógica para os clientes se juntarem e saírem de canais.
+- [ ] Implementar o envio e recebimento de mensagens de canais.
+- [ ] Garantir que as mensagens enviadas por um cliente sejam encaminhadas para todos os clientes no canal.
 
 **Critérios de Aceitação:**
 - Clientes devem conseguir criar, ingressar e sair de canais.
@@ -55,8 +55,8 @@
 - Permita que operadores realizem essas ações e que as alterações sejam aplicadas corretamente aos canais.
 
 **Tarefas:**
-- Adicionar lógica para os comandos KICK (expulsar), INVITE (convidar), TOPIC (alterar tópico) e MODE (alterar modos do canal).
-- Garantir que apenas operadores possam executar essas ações.
+- [ ] Adicionar lógica para os comandos KICK (expulsar), INVITE (convidar), TOPIC (alterar tópico) e MODE (alterar modos do canal).
+- [ ] Garantir que apenas operadores possam executar essas ações.
 
 **Critérios de Aceitação:**
 - Operadores devem conseguir usar os comandos KICK, INVITE, TOPIC e MODE com sucesso.
@@ -69,9 +69,9 @@
 - Implementar testes para verificar a funcionalidade e a robustez do servidor, incluindo o manuseio de erros e situações de carga.
 
 **Tarefas:**
-- Implementar I/O não-bloqueante e utilizar `poll()` ou equivalente para todas as operações.
-- Criar e executar testes para verificar o comportamento do servidor em condições de erro e carga.
-- Documentar os procedimentos de teste e os resultados.
+- [ ] Implementar I/O não-bloqueante e utilizar `poll()` ou equivalente para todas as operações.
+- [ ] Criar e executar testes para verificar o comportamento do servidor em condições de erro e carga.
+- [ ] Documentar os procedimentos de teste e os resultados.
 
 **Critérios de Aceitação:**
 - O servidor deve operar sem travar e lidar eficientemente com múltiplos clientes.
