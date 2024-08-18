@@ -5,7 +5,7 @@ GTEST_LIB_DIR = $(GTEST_BUILD_DIR)/lib
 GTEST_INCLUDE_DIR = $(GTEST_DIR)/googletest/include
 GMOCK_INCLUDE_DIR = $(GTEST_DIR)/googlemock/include
 
-all: $(NAME) $(GTEST_BUILD_DIR)/libgtest.a
+all: $(GTEST_BUILD_DIR)/libgtest.a $(NAME)
 
 $(GTEST_BUILD_DIR)/libgtest.a:
 	if [ ! -d "$(GTEST_DIR)" ]; then \
