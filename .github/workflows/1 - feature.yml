@@ -1,0 +1,59 @@
+name: Feature Workflow
+
+on:
+    push:
+        branches:
+            - 'feature/*'
+
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+                uses: actions/checkout@v2
+
+            - name: Set up C++ environment
+                uses: actions/setup-cpp@v1
+                with:
+                    cpp-version: '98'
+
+            - name: Build and run tests
+                run: |
+                    cd tests
+                    make
+                    ./run_tests
+
+            - name: Calculate code coverage
+                run: |
+                    cd tests
+                    make coverage
+                    coverage_percentage=$(gcovr -r . --xml | grep -oP '(?<=line-rate=")[\d.]+')
+                    if (( $(echo "$coverage_percentage >= 0.8" | bc -l) )); then
+                        echo "Code coverage is above 80%"
+                    else
+                        echo "Code coverage is below 80%"
+                        exit 1
+                    fi
+
+    create-pr:
+        needs: build-and-test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+                uses: actions/checkout@v2
+
+            - name: Set up Git
+                run: |
+                    git config --global user.name 'GitHub Actions'
+                    git config --global user.email 'actions@github.com'
+
+            - name: Create PR to staging
+                uses: peter-evans/create-pull-request@v3
+                with:
+                    token: ${{ secrets.GITHUB_TOKEN }}
+                    branch: feature/${{ github.sha }}
+                    title: 'Merge feature branch to staging'
+                    body: 'This PR merges the feature branch to staging'
+                    labels: 'automerge'
