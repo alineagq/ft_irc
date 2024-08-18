@@ -12,7 +12,7 @@
 - [x] Criar a estrutura de diretórios e arquivos iniciais (`src`, `include`, `Makefile`, etc.).
 - [x] Implementar a função principal que inicializa o servidor e configura o `socket`.
 - [x] Garantir que o servidor escute em uma porta especificada e aceite conexões.
-- [ ] Criação de testes unitários.
+- [x] Criação de testes unitários.
 - [ ] Criação de testes de integração.
 
 **Critérios de Aceitação:**
