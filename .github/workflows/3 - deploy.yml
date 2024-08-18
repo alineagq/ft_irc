@@ -1,40 +1,40 @@
 name: Staging Deployment
 
 on:
-    push:
-        branches:
-            - deploy
+  push:
+    branches:
+      - deploy
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout code
-                uses: actions/checkout@v2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-            - name: Create temporary branch
-                run: |
-                    git checkout -b vX.X.X
+      - name: Create temporary branch
+        run: |
+          git checkout -b vX.X.X
 
-            - name: Bump version
-                run: |
-                    # Use bumpversion to update the version number
+      - name: Bump version
+        run: |
+          # Use bumpversion to update the version number
 
-            - name: Remove unnecessary files
-                run: |
-                    rm -rf tests/
-                    find . -type f ! -name '*.cpp' ! -name '*.hpp' ! -name '*.h' ! -name '*.tpp' ! -name '*.ipp' -delete
-                    rm -rf .github/
-                    rm -rf .gitignore
+      - name: Remove unnecessary files
+        run: |
+          rm -rf tests/
+          find . -type f ! -name '*.cpp' ! -name '*.hpp' ! -name '*.h' ! -name '*.tpp' ! -name '*.ipp' -delete
+          rm -rf .github/
+          rm -rf .gitignore
 
-            - name: Commit changes
-                run: |
-                    git add .
-                    git commit -m "Update version and remove unnecessary files"
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Update version and remove unnecessary files"
 
-            - name: Push changes
-                uses: ad-m/github-push-action@master
-                with:
-                    github_token: ${{ secrets.GITHUB_TOKEN }}
-                    branch: vX.X.X
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: vX.X.X
