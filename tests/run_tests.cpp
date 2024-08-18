@@ -23,6 +23,13 @@ public:
     MOCK_METHOD0(handleClient, void());
 };
 
+// Derived class to expose protected method for testing
+class TestTcpConnection : public TcpConnection {
+public:
+    using TcpConnection::TcpConnection; // Inherit constructors
+    using TcpConnection::handleClient;  // Expose protected method
+};
+
 // Test case for Socket class
 TEST(SocketTest, CreateSocket) {
     MockSocket mockSocket;
@@ -88,7 +95,7 @@ TEST(TcpConnectionTest, HandleClient) {
     clientAddr.sin_port = htons(8080);
     inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr);
 
-    TcpConnection connection(clientSocket, clientAddr);
+    TestTcpConnection connection(clientSocket, clientAddr);
     connection.handleClient();
 }
 
