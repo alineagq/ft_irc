@@ -27,7 +27,7 @@ jobs:
         run: |
           cd tests
           make coverage
-          coverage_percentage=$(gcovr -r .. | grep 'TOTAL' | awk '{print $4}' | sed 's/%//')
+          coverage_percentage=$(gcovr -r .. --filter='../src/' | grep 'TOTAL' | awk '{print $4}' | sed 's/%//')
           echo "Code coverage: $coverage_percentage \%"
           if [ -z "$coverage_percentage" ]; then
             echo -e "\033[0;31mFailed to calculate code coverage\033[0m"
