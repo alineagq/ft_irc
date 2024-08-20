@@ -60,6 +60,29 @@ TEST(SocketTest, CloseSocket) {
     socket.close(); // No explicit assertion needed, just ensuring no exceptions are thrown
 }
 
+// Test case for TcpConnection class
+TEST(TcpConnectionTest, HandleConnection) {
+    int clientSocket = 1;
+    sockaddr_in clientAddr;
+    clientAddr.sin_family = AF_INET;
+    clientAddr.sin_port = htons(8080);
+    inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr);
+
+    TcpConnection connection(clientSocket, clientAddr);
+    connection.handleConnection();
+}
+
+TEST(TcpConnectionTest, HandleClient) {
+    int clientSocket = 1;
+    sockaddr_in clientAddr;
+    clientAddr.sin_family = AF_INET;
+    clientAddr.sin_port = htons(8080);
+    inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr);
+
+    TestTcpConnection connection(clientSocket, clientAddr);
+    connection.handleClient();
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
