@@ -1,10 +1,18 @@
 // test_network.cpp
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include "../include/network/Socket.hpp"
 #include "../include/network/TcpConnection.hpp"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <thread>
+
+
+class MockTcpConnection {
+public:
+    MOCK_METHOD0(handleConnection, void());
+    MOCK_METHOD0(handleClient, void());
+};
 
 // Function to simulate a client connecting to the server
 void simulateClientConnection(int port) {
