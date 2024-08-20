@@ -27,10 +27,10 @@ jobs:
           cd tests
           make coverage
           coverage_percentage=$(gcovr -r . --xml | grep -oP '(?<=line-rate=")[\d.]+')
-          if (( $(echo " >= 0.8" | bc -l) )); then
-            echo -e "\033[0;32mCode coverage is above 80% ()\033[0m"
+          if (( $(echo "$coverage_percentage >= 0.8" | bc -l) )); then
+            echo -e "\033[0;32mCode coverage is above 80% ($coverage_percentage)\033[0m"
           else
-            echo -e "\033[0;31mCode coverage is below 80% ()\033[0m"
+            echo -e "\033[0;31mCode coverage is below 80% ($coverage_percentage)\033[0m"
             exit 1
           fi
 
