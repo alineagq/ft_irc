@@ -1,6 +1,7 @@
 // test_network.cpp
 #include <gtest/gtest.h>
 #include "../include/network/Socket.hpp"
+#include "../include/network/TcpConnection.hpp"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <thread>
