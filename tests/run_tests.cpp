@@ -14,6 +14,13 @@ public:
     MOCK_METHOD0(handleClient, void());
 };
 
+// Derived class to expose protected method for testing
+class TestTcpConnection : public TcpConnection {
+public:
+    using TcpConnection::TcpConnection; // Inherit constructors
+    using TcpConnection::handleClient;  // Expose protected method
+};
+
 // Function to simulate a client connecting to the server
 void simulateClientConnection(int port) {
     int clientSock = socket(AF_INET, SOCK_STREAM, 0);
