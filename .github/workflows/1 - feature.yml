@@ -1,59 +1,56 @@
 name: Feature Workflow
 on:
-    push:
-        branches:
-            - 'feature/*'
-
+  push:
+    branches:
+      - 'feature/*'
 jobs:
-    build-and-test:
-        runs-on: ubuntu-latest
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
+      - name: Set up C++ environment
+        uses: aminya/setup-cpp@v1
 
-            - name: Set up C++ environment
-              uses: aminya/setup-cpp@v1
+      - name: Install gcovr
+        run: sudo apt-get install -y gcovr
 
-            - name: Install gcovr
-              run: sudo apt-get install -y gcovr
+      - name: Build and run tests
+        run: |
+          cd tests
+          make
+          ./run_tests || exit 1
 
-            - name: Build and run tests
-              run: |
-                  cd tests
-                  make
-                  ./run_tests || exit 1
+      - name: Calculate code coverage
+        run: |
+          cd tests
+          make coverage
+          coverage_percentage=$(gcovr -r . --xml | grep -oP '(?<=line-rate=")[\d.]+')
+          if (( $(echo " >= 0.8" | bc -l) )); then
+            echo -e "\033[0;32mCode coverage is above 80% ()\033[0m"
+          else
+            echo -e "\033[0;31mCode coverage is below 80% ()\033[0m"
+            exit 1
+          fi
 
-            - name: Calculate code coverage
-              run: |
-                  cd tests
-                  make coverage
-                  coverage_percentage=$(gcovr -r . --xml | grep -oP '(?<=line-rate=")[\d.]+')
-                  if (( $(echo " >= 0.8" | bc -l) )); then
-                      echo -e "\033[0;32mCode coverage is above 80% ()\033[0m"
-                  else
-                      echo -e "\033[0;31mCode coverage is below 80% ()\033[0m"
-                      exit 1
-                  fi
+  create-pr:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    create-pr:
-        needs: build-and-test
-        runs-on: ubuntu-latest
+      - name: Set up Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
-
-            - name: Set up Git
-              run: |
-                  git config --global user.name 'GitHub Actions'
-                  git config --global user.email 'actions@github.com'
-
-            - name: Create PR to staging
-              uses: peter-evans/create-pull-request@v3
-              with:
-                  token: ${{ secrets.GITHUB_TOKEN }}
-                  branch: feature/${{ github.sha }}
-                  title: 'Merge feature branch to staging'
-                  body: 'This PR merges the feature branch to staging'
-                  labels: 'automerge'
+      - name: Create PR to staging
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: feature/${{ github.sha }}
+          title: 'Merge feature branch to staging'
+          body: 'This PR merges the feature branch to staging'
+          labels: 'automerge'
