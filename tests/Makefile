@@ -21,11 +21,13 @@ $(NAME): $(NAME).cpp ../src/network/Socket.cpp ../src/network/TcpConnection.cpp
 	$(GTEST_LIB_DIR)/libgmock_main.a -pthread
 
 coverage: $(NAME).cpp ../src/network/Socket.cpp ../src/network/TcpConnection.cpp
-	$(CXX) -o $@ $^ -I$(GTEST_INCLUDE_DIR) -I$(GMOCK_INCLUDE_DIR) \
+	$(CXX) -o $(NAME) $^ -I$(GTEST_INCLUDE_DIR) -I$(GMOCK_INCLUDE_DIR) \
 	$(GTEST_LIB_DIR)/libgtest.a \
 	$(GTEST_LIB_DIR)/libgtest_main.a \
 	$(GTEST_LIB_DIR)/libgmock.a \
 	$(GTEST_LIB_DIR)/libgmock_main.a -pthread --coverage
+	./$(NAME)
+	gcovr -r ..
 
 clean:
 	rm -f $(NAME) *.gcno *.gcda coverage
