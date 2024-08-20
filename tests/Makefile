@@ -27,7 +27,7 @@ coverage: $(NAME).cpp ../src/network/Socket.cpp ../src/network/TcpConnection.cpp
 	$(GTEST_LIB_DIR)/libgmock.a \
 	$(GTEST_LIB_DIR)/libgmock_main.a -pthread --coverage
 	./$(NAME)
-	gcovr -r ..
+	gcovr -r .. --filter='src/'
 
 clean:
 	rm -f $(NAME) *.gcno *.gcda coverage
