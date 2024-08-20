@@ -60,3 +60,11 @@ jobs:
           title: 'Merge feature branch to staging'
           body: 'This PR merges the feature branch to staging'
           labels: 'automerge'
+
+      - name: Force merge PR
+        if: success()
+        run: |
+          git fetch origin staging
+          git checkout staging
+          git merge --squash ${{ github.head_ref }}
+          git push origin staging --force
