@@ -28,7 +28,7 @@ jobs:
           cd tests
           make coverage
           coverage_percentage=$(gcovr -r .. --filter='../src/' | grep 'TOTAL' | awk '{print $4}' | sed 's/%//')
-          echo "Code coverage: $coverage_percentage \%"
+          echo "Code coverage: $coverage_percentage%"
           if [ -z "$coverage_percentage" ]; then
             echo -e "\033[0;31mFailed to calculate code coverage\033[0m"
             exit 1
@@ -55,7 +55,8 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: feature/${{ github.sha }}
+          base: staging
+          branch: ${{ github.head_ref }}
           title: 'Merge feature branch to staging'
           body: 'This PR merges the feature branch to staging'
           labels: 'automerge'
