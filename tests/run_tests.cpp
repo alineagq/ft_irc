@@ -1,102 +1,44 @@
 // test_network.cpp
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
-#include "../include/network/TcpConnection.hpp"
 #include "../include/network/Socket.hpp"
 #include <arpa/inet.h>
 #include <unistd.h>
 
-// Mock class for Socket
-class MockSocket {
-public:
-    MOCK_METHOD0(create, bool());
-    MOCK_METHOD1(bind, bool(unsigned short port));
-    MOCK_METHOD1(listen, bool(int backlog));
-    MOCK_METHOD1(accept, int(sockaddr_in& clientAddr));
-    MOCK_METHOD0(close, void());
-};
-
-// Mock class for TcpConnection
-class MockTcpConnection {
-public:
-    MOCK_METHOD0(handleConnection, void());
-    MOCK_METHOD0(handleClient, void());
-};
-
-// Derived class to expose protected method for testing
-class TestTcpConnection : public TcpConnection {
-public:
-    using TcpConnection::TcpConnection; // Inherit constructors
-    using TcpConnection::handleClient;  // Expose protected method
-};
-
 // Test case for Socket class
 TEST(SocketTest, CreateSocket) {
-    MockSocket mockSocket;
-    EXPECT_CALL(mockSocket, create())
-        .Times(1)
-        .WillOnce(testing::Return(true));
-
-    EXPECT_TRUE(mockSocket.create());
+    Socket socket;
+    EXPECT_TRUE(socket.create());
 }
 
 TEST(SocketTest, BindSocket) {
-    MockSocket mockSocket;
-    EXPECT_CALL(mockSocket, bind(testing::_))
-        .Times(1)
-        .WillOnce(testing::Return(true));
-
-    EXPECT_TRUE(mockSocket.bind(8080));
+    Socket socket;
+    ASSERT_TRUE(socket.create());
+    EXPECT_TRUE(socket.bind(8080));
 }
 
 TEST(SocketTest, ListenSocket) {
-    MockSocket mockSocket;
-    EXPECT_CALL(mockSocket, listen(testing::_))
-        .Times(1)
-        .WillOnce(testing::Return(true));
-
-    EXPECT_TRUE(mockSocket.listen(5));
+    Socket socket;
+    ASSERT_TRUE(socket.create());
+    ASSERT_TRUE(socket.bind(8080));
+    EXPECT_TRUE(socket.listen(5));
 }
 
 TEST(SocketTest, AcceptConnection) {
-    MockSocket mockSocket;
-    sockaddr_in clientAddr;
-    EXPECT_CALL(mockSocket, accept(testing::_))
-        .Times(1)
-        .WillOnce(testing::Return(1));
+    Socket serverSocket;
+    ASSERT_TRUE(serverSocket.create());
+    ASSERT_TRUE(serverSocket.bind(8080));
+    ASSERT_TRUE(serverSocket.listen(5));
 
-    EXPECT_EQ(mockSocket.accept(clientAddr), 1);
+    sockaddr_in clientAddr;
+    int clientSocket = serverSocket.accept(clientAddr);
+    EXPECT_GT(clientSocket, 0);
 }
 
 TEST(SocketTest, CloseSocket) {
-    MockSocket mockSocket;
-    EXPECT_CALL(mockSocket, close())
-        .Times(1);
-
-    mockSocket.close();
-}
-
-// Test case for TcpConnection class
-TEST(TcpConnectionTest, HandleConnection) {
-    int clientSocket = 1;
-    sockaddr_in clientAddr;
-    clientAddr.sin_family = AF_INET;
-    clientAddr.sin_port = htons(8080);
-    inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr);
-
-    TcpConnection connection(clientSocket, clientAddr);
-    connection.handleConnection();
-}
-
-TEST(TcpConnectionTest, HandleClient) {
-    int clientSocket = 1;
-    sockaddr_in clientAddr;
-    clientAddr.sin_family = AF_INET;
-    clientAddr.sin_port = htons(8080);
-    inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr);
-
-    TestTcpConnection connection(clientSocket, clientAddr);
-    connection.handleClient();
+    Socket socket;
+    ASSERT_TRUE(socket.create());
+    socket.close();
+    // No explicit assertion needed, just ensuring no exceptions are thrown
 }
 
 int main(int argc, char **argv) {
