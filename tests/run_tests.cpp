@@ -6,19 +6,26 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <thread>
+#include <fstream>
+#include <sys/stat.h>
 
+using ::testing::AtLeast;
+using ::testing::Return;
 
-class MockTcpConnection {
+class MockTcpConnection : public TcpConnection {
 public:
-    MOCK_METHOD0(handleConnection, void());
+    MockTcpConnection(int socket, const sockaddr_in& clientAddr)
+        : TcpConnection(socket, clientAddr) {}
+
     MOCK_METHOD0(handleClient, void());
 };
 
-// Derived class to expose protected method for testing
 class TestTcpConnection : public TcpConnection {
 public:
-    using TcpConnection::TcpConnection; // Inherit constructors
-    using TcpConnection::handleClient;  // Expose protected method
+    TestTcpConnection(int socket, const sockaddr_in& clientAddr)
+        : TcpConnection(socket, clientAddr) {}
+
+    using TcpConnection::handleClient;
 };
 
 // Function to simulate a client connecting to the server
@@ -76,27 +83,74 @@ TEST(SocketTest, CloseSocket) {
     socket.close(); // No explicit assertion needed, just ensuring no exceptions are thrown
 }
 
-// Test case for TcpConnection class
-TEST(TcpConnectionTest, HandleConnection) {
-    int clientSocket = 1;
+// Test cases for TcpConnection class
+TEST(TcpConnectionTest, HandleConnectionCallsHandleClient) {
     sockaddr_in clientAddr;
     clientAddr.sin_family = AF_INET;
     clientAddr.sin_port = htons(8080);
     inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr);
 
-    TcpConnection connection(clientSocket, clientAddr);
-    connection.handleConnection();
+    MockTcpConnection mockTcpConnection(1, clientAddr);
+    EXPECT_CALL(mockTcpConnection, handleClient()).Times(1);
+
+    mockTcpConnection.handleConnection();
 }
 
-TEST(TcpConnectionTest, HandleClient) {
-    int clientSocket = 1;
+TEST(TcpConnectionTest, HandleClientReceivesAndEchoesMessage) {
+    int sockets[2];
+    socketpair(AF_UNIX, SOCK_STREAM, 0, sockets);
+
     sockaddr_in clientAddr;
     clientAddr.sin_family = AF_INET;
     clientAddr.sin_port = htons(8080);
     inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr);
 
-    TestTcpConnection connection(clientSocket, clientAddr);
-    connection.handleClient();
+    TestTcpConnection tcpConnection(sockets[0], clientAddr);
+
+    std::thread clientThread([&sockets]() {
+        const char* message = "Hello, Server!";
+        send(sockets[1], message, strlen(message), 0);
+
+        char buffer[4096];
+        int bytesReceived = recv(sockets[1], buffer, sizeof(buffer) - 1, 0);
+        buffer[bytesReceived] = '\0';
+
+        EXPECT_STREQ(buffer, message);
+        close(sockets[1]);
+    });
+
+    tcpConnection.handleClient();
+    clientThread.join();
+}
+
+TEST(TcpConnectionTest, HandleClientCreatesAndWritesToLogFile) {
+    int sockets[2];
+    socketpair(AF_UNIX, SOCK_STREAM, 0, sockets);
+
+    sockaddr_in clientAddr;
+    clientAddr.sin_family = AF_INET;
+    clientAddr.sin_port = htons(8080);
+    inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr);
+
+    TestTcpConnection tcpConnection(sockets[0], clientAddr);
+
+    std::thread clientThread([&sockets]() {
+        const char* message = "Log this message!";
+        send(sockets[1], message, strlen(message), 0);
+        close(sockets[1]);
+    });
+
+    tcpConnection.handleClient();
+    clientThread.join();
+
+    std::ifstream logFile("log.txt");
+    ASSERT_TRUE(logFile.is_open());
+
+    std::string logContent((std::istreambuf_iterator<char>(logFile)), std::istreambuf_iterator<char>());
+    EXPECT_NE(logContent.find("Received: Log this message!"), std::string::npos);
+
+    logFile.close();
+    remove("log.txt");
 }
 
 int main(int argc, char **argv) {
