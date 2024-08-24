@@ -29,6 +29,14 @@ coverage: $(NAME).cpp ../src/network/Socket.cpp ../src/network/TcpConnection.cpp
 	./$(NAME)
 	gcovr -r .. --filter='../src/'
 
+integrations: ./integrations/TestReceiveMessage.cpp ../src/network/Socket.cpp ../src/network/TcpConnection.cpp
+	$(CXX) -o $(NAME) $^ -I$(GTEST_INCLUDE_DIR) -I$(GMOCK_INCLUDE_DIR) \
+	$(GTEST_LIB_DIR)/libgtest.a \
+	$(GTEST_LIB_DIR)/libgtest_main.a \
+	$(GTEST_LIB_DIR)/libgmock.a \
+	$(GTEST_LIB_DIR)/libgmock_main.a -pthread
+	./$(NAME)
+
 clean:
 	rm -f $(NAME) *.gcno *.gcda coverage
 	rm -rf $(GTEST_DIR)

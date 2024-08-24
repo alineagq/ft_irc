@@ -3,24 +3,41 @@
 #include <unistd.h>
 #include <cstring>
 #include <arpa/inet.h>
-#include <netdb.h> // Add this line to include the necessary header file for NI_MAXHOST and NI_MAXSERV
+#include <netdb.h>
+#include <fstream>
+#include <sys/stat.h>
 
 TcpConnection::TcpConnection(int socket, const sockaddr_in& clientAddr)
     : clientSocket(socket), clientAddr(clientAddr) {}
 
 void TcpConnection::handleConnection() {
     char host[NI_MAXHOST];
-    char svc[NI_MAXSERV];
     inet_ntop(AF_INET, &clientAddr.sin_addr, host, NI_MAXHOST);
-    std::cout << " connected on " << ntohs(clientAddr.sin_port) << std::endl;
-
-    std::cout << host << " connected on " << svc << std::endl;
+    std::cout << "Client " << host << " connected on port " << ntohs(clientAddr.sin_port) << std::endl;
 
     handleClient();
 }
 
 void TcpConnection::handleClient() {
     char buf[4096];
+    const std::string logFileName = "log.txt";
+
+    // Verifica se o arquivo existe, se não, cria-o
+    struct stat buffer;
+    if (stat(logFileName.c_str(), &buffer) != 0) {
+        std::ofstream createFile(logFileName);
+        if (!createFile) {
+            std::cerr << "Erro ao criar o arquivo " << logFileName << std::endl;
+            return;
+        }
+    }
+
+    std::ofstream logFile(logFileName, std::ios::app);
+    if (!logFile.is_open()) {
+        std::cerr << "Failed to open log file." << std::endl;
+        return;
+    }
+
     while (true) {
         memset(buf, 0, sizeof(buf));
 
@@ -35,10 +52,19 @@ void TcpConnection::handleClient() {
             break;
         }
 
-        std::cout << "Received: " << std::string(buf, 0, bytesReceived) << std::endl;
+        std::string receivedMessage(buf, 0, bytesReceived);
+        std::cout << "Received: " << receivedMessage << std::endl;
+        logFile << "Received: " << receivedMessage << std::endl;
 
-        send(clientSocket, buf, bytesReceived, 0);
+        int bytesSent = send(clientSocket, buf, bytesReceived, 0);
+        if (bytesSent == -1) {
+            std::cerr << "Error sending message back to client" << std::endl;
+            break;
+        }
+
+        std::cout << "Echoed message back to client" << std::endl;
     }
 
+    logFile.close();
     ::close(clientSocket);
 }
