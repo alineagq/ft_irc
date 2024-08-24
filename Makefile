@@ -9,7 +9,7 @@ OBDIR       = .obj
 SRC         = $(shell find $(SRC_DIR) -name '*.cpp')
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBDIR)/%.o, $(SRC))
 
-INCLUDE_DIR = include
+INCLUDE_DIR = $(shell find $(SRC_DIR) -type d)
 SRC_DIR     = src
 TESTS_DIR   = tests
 

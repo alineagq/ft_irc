@@ -1,11 +1,4 @@
-#include "../../include/network/TcpConnection.hpp"
-#include <iostream>
-#include <unistd.h>
-#include <cstring>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <fstream>
-#include <sys/stat.h>
+#include "TcpConnection.hpp"
 
 TcpConnection::TcpConnection(int socket, const sockaddr_in& clientAddr)
     : clientSocket(socket), clientAddr(clientAddr) {}
@@ -22,7 +15,6 @@ void TcpConnection::handleClient() {
     char buf[4096];
     const std::string logFileName = "log.txt";
 
-    // Verifica se o arquivo existe, se não, cria-o
     struct stat buffer;
     if (stat(logFileName.c_str(), &buffer) != 0) {
         std::ofstream createFile(logFileName);
