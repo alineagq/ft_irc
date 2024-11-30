@@ -6,10 +6,11 @@ RM          = rm -rf
 
 OBDIR       = .obj
 
-SRC         = $(shell find $(SRC_DIR) -name '*.cpp')
+SRC         = src/network/Socket.cpp src/network/TcpConnection.cpp \
+			src/network/Logger.cpp src/main.cpp
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBDIR)/%.o, $(SRC))
 
-INCLUDE_DIR = $(shell find $(SRC_DIR) -type d)
+INCLUDE_DIR = src/network
 SRC_DIR     = src
 TESTS_DIR   = tests
 

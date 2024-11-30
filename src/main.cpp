@@ -1,41 +1,60 @@
 #include "network/Socket.hpp"
 #include "network/TcpConnection.hpp"
 #include <iostream>
-#include <cstdlib> 
-#include "utils/Logger.hpp"
+#include <cstdlib>
+#include "network/Logger.hpp"
+#include <sstream>  // Include for std::ostringstream
 
 Logger logger("server.log", "server_error.log");
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        logger.error("Usage: " + std::string(argv[0]) + " <port>");
+        // Convert the error message to string using ostringstream
+        std::ostringstream oss;
+        oss << "Usage: " << argv[0] << " <port>";
+        logger.error(oss.str());
         return EINVAL;
     }
 
     int port = std::atoi(argv[1]);
     if (port <= 0 || port > 65535) {
-        logger.error("Invalid port number. Port must be between 1 and 65535.");
+        // Convert the error message to string using ostringstream
+        std::ostringstream oss;
+        oss << "Invalid port number. Port must be between 1 and 65535.";
+        logger.error(oss.str());
         return -2;
     }
 
     Socket serverSocket;
 
     if (!serverSocket.create()) {
-        logger.error("Can't create a socket!");
+        // Convert the error message to string using ostringstream
+        std::ostringstream oss;
+        oss << "Can't create a socket!";
+        logger.error(oss.str());
         return -3;
     }
 
     if (!serverSocket.bind(port)) {
-        logger.error("Can't bind to IP/port " + std::to_string(port));
+        // Convert the error message to string using ostringstream
+        std::ostringstream oss;
+        oss << "Can't bind to IP/port " << port;
+        logger.error(oss.str());
         return -4;
     }
 
     if (!serverSocket.listen()) {
-        logger.error("Can't listen!");
+        // Convert the error message to string using ostringstream
+        std::ostringstream oss;
+        oss << "Can't listen!";
+        logger.error(oss.str());
         return -5;
     }
 
-    logger.info("Server listening on port " + std::to_string(port));
+    // Convert the success message to string using ostringstream
+    std::ostringstream oss;
+    oss << "Server listening on port " << port;
+    logger.info(oss.str());
 
     while (true) {
         sockaddr_in clientAddr;

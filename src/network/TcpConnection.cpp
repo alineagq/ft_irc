@@ -17,14 +17,16 @@ void TcpConnection::handleClient() {
 
     struct stat buffer;
     if (stat(logFileName.c_str(), &buffer) != 0) {
-        std::ofstream createFile(logFileName);
+        // Corrected: Using .c_str() to convert std::string to const char*
+        std::ofstream createFile(logFileName.c_str()); // This works in C++98
         if (!createFile) {
-            std::cerr << "Erro ao criar o arquivo " << logFileName << std::endl;
+            std::cerr << "Error creating the file " << logFileName << std::endl;
             return;
         }
     }
 
-    std::ofstream logFile(logFileName, std::ios::app);
+    // Corrected: Using .c_str() to convert std::string to const char*
+    std::ofstream logFile(logFileName.c_str(), std::ios::app); // This works in C++98
     if (!logFile.is_open()) {
         std::cerr << "Failed to open log file." << std::endl;
         return;
