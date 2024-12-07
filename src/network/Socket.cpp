@@ -27,6 +27,7 @@ bool Socket::listen(int backlog) {
     return ::listen(sock, backlog) != -1;
 }
 
+
 int Socket::accept(sockaddr_in& clientAddr) {
     socklen_t clientSize = sizeof(clientAddr);
     return ::accept(sock, (sockaddr*)&clientAddr, &clientSize);
@@ -35,4 +36,8 @@ int Socket::accept(sockaddr_in& clientAddr) {
 void Socket::close() {
     ::close(sock);
     sock = -1;
+}
+
+int Socket::getSocket() const {
+    return sock;
 }

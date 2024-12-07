@@ -1,0 +1,71 @@
+Received: teste
+
+Received: echo hello
+
+Received: teste
+
+Received: PASS senha123
+
+Received: NICK Nanicolas
+USER Nanicolas 0 * :Nicolas
+
+Received: PING :1733451680525
+
+Received: PONG :1733451680525
+
+Received: PASS teste
+
+Received: NICK teste
+USER teste 0 * :teste
+
+Received: PING :1733453115851
+
+Received: PONG :1733453115851
+
+Received: teste
+
+Received: será q vai
+
+Received: teste
+ser
+
+Received: teste
+
+Received: burgo
+
+Received: teste
+
+Received: pq minha conexao esta fechando inesperadamente
+
+Received: teste
+
+Received: teste
+
+Received: teste
+
+Received: teste
+
+Received: teste
+
+Received: maisum
+
+Received: ala
+
+Received: tachegando
+
+Received: as mensagem vei
+
+Received: dahora carai
+
+Received: consegui
+
+Received: maomeno ne
+
+Received: dava pra ser melhor
+
+Received: ando desfocado
+
+Received: pq será
+
+Received: eitcha lele
+
