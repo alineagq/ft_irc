@@ -4,12 +4,27 @@
 #include <vector>
 #include <sys/epoll.h>
 #include <fcntl.h>
+#include <signal.h>
 #include "network/Logger.hpp"
 #include "network/Socket.hpp"
 #include "network/TcpConnection.hpp"
 
 
 Logger logger("server.log", "server_error.log");
+bool    Signal = false; //-> initialize the static boolean
+
+void signalHandler(int signum)
+{
+	(void)signum;
+	std::cout << std::endl << "Signal Received!" << std::endl;
+	Signal = true;
+}
+
+void setSignal() {
+    signal(SIGINT, signalHandler); //catch the signal (ctrl + c)
+    signal(SIGQUIT, signalHandler); // catch the signal (ctrl + \)
+}
+
 
 void handleUser(int clientSocket) {
     char buf[4096];
@@ -32,32 +47,34 @@ void handleUser(int clientSocket) {
         return;
     }
 
-        memset(buf, 0, sizeof(buf));
+    memset(buf, 0, sizeof(buf));
 
-        int bytesReceived = recv(clientSocket, buf, sizeof(buf) - 1, 0);
-        if (bytesReceived == -1) {
-            std::cerr << "There was a connection issue" << std::endl;
-        }
+    int bytesReceived = recv(clientSocket, buf, sizeof(buf) - 1, 0);
+    if (bytesReceived == -1) {
+        std::cerr << "There was a connection issue" << std::endl;
+    }
 
-        if (bytesReceived == 0) {
-            std::cout << "The client disconnected" << std::endl;
-        }
+    if (bytesReceived == 0) {
+        std::cout << "The client disconnected" << std::endl;
+        close(clientSocket);
+    }
 
-        std::string receivedMessage(buf, 0, bytesReceived);
-        std::cout << "Received: " << receivedMessage << std::endl;
-        logFile << "Received: " << receivedMessage << std::endl;
+    std::string receivedMessage(buf, 0, bytesReceived);
+    std::cout << "Received: " << receivedMessage << std::endl;
+    logFile << "Received: " << receivedMessage << std::endl;
 
-        int bytesSent = send(clientSocket, buf, bytesReceived, 0);
-        if (bytesSent == -1) {
-            std::cerr << "Error sending message back to client" << std::endl;
-        }
+    int bytesSent = send(clientSocket, buf, bytesReceived, 0);
+    if (bytesSent == -1) {
+        std::cerr << "Error sending message back to client" << std::endl;
+    }
 
-        std::cout << "Echoed message back to client" << std::endl;
+    std::cout << "Echoed message back to client" << std::endl;
 
     logFile.close();
 }
 
 bool configureClient(int epollFd, int clientSocket) {
+    //configuring the client socket to be non-blocking and adding it to the epoll
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1) {
         std::cerr << "Failed to set non-blocking mode for clientSocket" << std::endl;
         ::close(clientSocket);
@@ -86,6 +103,8 @@ int main(int argc, char* argv[]) {
         logger.error(oss.str());
         return EINVAL;
     }
+
+    setSignal();
 
     int port = std::atoi(argv[1]);
     if (port <= 0 || port > 65535) {
@@ -142,7 +161,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    while (true) {
+    while (!Signal) {
             sockaddr_in clientAddr;
             int numEvents = epoll_wait(epollFd, events, 10, -1);
             if (numEvents == -1) {
