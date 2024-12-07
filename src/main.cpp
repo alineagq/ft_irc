@@ -154,14 +154,13 @@ int main(int argc, char* argv[]) {
                 if (events[i].data.fd == serverSocket.getSocket()) {
                     int clientSocket = serverSocket.accept(clientAddr);
                             if (clientSocket == -1) {
-                    std::cerr << "Accept failed!" << std::endl;
-                    continue;
-                }
-
-                // Configurar o cliente com uma função separada
-                if (!configureClient(epollFd, clientSocket)) {
-                    std::cerr << "Failed to configure client" << std::endl;
-                }
+                        std::cerr << "Accept failed!" << std::endl;
+                        continue;
+                    }
+                    if (!configureClient(epollFd, clientSocket)) {
+                        std::cerr << "Failed to configure client" << std::endl;
+                        continue;
+                     }
                 }
                 else
                     handleUser(events[i].data.fd);
