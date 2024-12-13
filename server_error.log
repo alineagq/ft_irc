@@ -20,4 +20,4 @@ Invalid server socket file descriptorFailed to add server socket to epoll: Bad f
 Failed to add server socket to epoll: Bad file descriptor
 Failed to add server socket to epoll: Bad file descriptor
 Failed to add server socket to epoll: Bad file descriptorFailed to add server socket to epoll: Bad file descriptor
-Invalid server socket file descriptor
+Invalid server socket file descriptorFailed to wait for eventsFailed to wait for events

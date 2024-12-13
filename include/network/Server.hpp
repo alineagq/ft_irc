@@ -23,11 +23,11 @@ class Server {
         Server &operator=(Server &other);
 
         void handleUser(int clientSocket);
-        void signalHandler(int signum);
-        // void setSignals();
+        static void signalHandler(int signum);
 
         Socket& getSocket();
         int getEpollFd() const;
+        static bool getSignal();
 
     private:
         int _epollFd;

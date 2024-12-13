@@ -8,7 +8,10 @@
 #include "../include/network/Server.hpp"
 #include "../include/auth/HandleUser.hpp"
 
+void setSignals();
 Logger logger("server.log", "server_error.log");
+bool Server::_Signal = false;
+ //-> initialize the static boolean
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -25,32 +28,37 @@ int main(int argc, char* argv[]) {
         std::ostringstream oss;
         oss << "Invalid port number. Port must be between 1 and 65535.";
         logger.error(oss.str());
-        return -2;
+        exit(EXIT_FAILURE);
     }
 
     Server server(logger, port);
     HandleUser handleUser;
 
     int epollFd = server.getEpollFd();
-
     int serverFd = server.getSocket().getFd();
     if (serverFd <= 0) {
         logger.error("Invalid server socket file descriptor");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
-    std::cout << "serverFd: "<< serverFd << std::endl;
+    try {
+        setSignals();
+    } catch (std::exception& e) {
+        logger.error("Failed to set signals: " + std::string(e.what()));
+        exit(EXIT_FAILURE);
+    }
+
 
     struct epoll_event ev, events[10];
     ev.events = EPOLLIN;
     ev.data.fd = serverFd; // o erro e por conta que não consigo adicionar o servidor a lista do epoll
     if (epoll_ctl(epollFd, EPOLL_CTL_ADD, serverFd, &ev) == -1) {
         logger.error("Failed to add server socket to epoll: " + std::string(strerror(errno)) + "\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
 
-    while (true) {
+    while (Server::getSignal() == false) {
             sockaddr_in clientAddr;
             int numEvents = epoll_wait(epollFd, events, 10, -1);
             if (numEvents == -1) {
@@ -76,4 +84,9 @@ int main(int argc, char* argv[]) {
     };
     //need to handle open file descriptors and close fds after a client disconnects
     return 0;
+}
+
+void setSignals() {
+    signal(SIGINT, Server::signalHandler);
+    signal(SIGQUIT, Server::signalHandler);
 }

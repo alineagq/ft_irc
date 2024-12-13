@@ -1,11 +1,9 @@
 #include "../../include/network/Server.hpp"
 
-bool    Server::_Signal = false; //-> initialize the static boolean
-
 Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port) {
     if (_epollFd == -1) {
         logger.error("Failed to create epoll file descriptor");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 
      if (!_serverSocket.create()) {
@@ -13,7 +11,7 @@ Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port
         std::ostringstream oss;
         oss << "Can't create a socket!";
         logger.error(oss.str());
-        throw std::runtime_error("Can't create a socket!");
+        exit(EXIT_FAILURE);
     }
 
     if (!_serverSocket.bind(port)) {
@@ -21,7 +19,7 @@ Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port
         std::ostringstream oss;
         oss << "Can't bind to IP/port " << port;
         logger.error(oss.str());
-        throw std::runtime_error("Can't bind to IP/port");
+        exit(EXIT_FAILURE);
     }
 
     if (!_serverSocket.listen()) {
@@ -29,7 +27,7 @@ Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port
         std::ostringstream oss;
         oss << "Can't listen!";
         logger.error(oss.str());
-        throw std::runtime_error("Can't listen!");
+        exit(EXIT_FAILURE);
     }
 
 
@@ -54,15 +52,14 @@ void Server::signalHandler(int signum)
 	_Signal = true;
 }
 
-// void Server::setSignals() {
-//     signal(SIGINT, Server::signalHandler); //catch the signal (ctrl + c)
-//     signal(SIGQUIT, Server::signalHandler); // catch the signal (ctrl + \)
-// }
-
 Socket& Server::getSocket() {
     return _serverSocket;
 }
 
 int Server::getEpollFd() const {
     return _epollFd;
+}
+
+bool Server::getSignal() {
+    return _Signal;
 }
