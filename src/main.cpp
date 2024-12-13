@@ -3,97 +3,12 @@
 #include <sstream>  // Include for std::ostringstream
 #include <vector>
 #include <sys/epoll.h>
-#include <fcntl.h>
-#include <signal.h>
-#include "network/Logger.hpp"
-#include "network/Socket.hpp"
-#include "network/TcpConnection.hpp"
-
+#include <cerrno>
+#include "../include/logger/Logger.hpp"
+#include "../include/network/Server.hpp"
+#include "../include/auth/HandleUser.hpp"
 
 Logger logger("server.log", "server_error.log");
-bool    Signal = false; //-> initialize the static boolean
-
-void signalHandler(int signum)
-{
-	(void)signum;
-	std::cout << std::endl << "Signal Received!" << std::endl;
-	Signal = true;
-}
-
-void setSignal() {
-    signal(SIGINT, signalHandler); //catch the signal (ctrl + c)
-    signal(SIGQUIT, signalHandler); // catch the signal (ctrl + \)
-}
-
-
-void handleUser(int clientSocket) {
-    char buf[4096];
-    const std::string logFileName = "log.txt";
-
-    struct stat buffer;
-    if (stat(logFileName.c_str(), &buffer) != 0) {
-        // Corrected: Using .c_str() to convert std::string to const char*
-        std::ofstream createFile(logFileName.c_str()); // This works in C++98
-        if (!createFile) {
-            std::cerr << "Error creating the file " << logFileName << std::endl;
-            return;
-        }
-    }
-
-    // Corrected: Using .c_str() to convert std::string to const char*
-    std::ofstream logFile(logFileName.c_str(), std::ios::app); // This works in C++98
-    if (!logFile.is_open()) {
-        std::cerr << "Failed to open log file." << std::endl;
-        return;
-    }
-
-    memset(buf, 0, sizeof(buf));
-
-    int bytesReceived = recv(clientSocket, buf, sizeof(buf) - 1, 0);
-    if (bytesReceived == -1) {
-        std::cerr << "There was a connection issue" << std::endl;
-    }
-
-    if (bytesReceived == 0) {
-        std::cout << "The client disconnected" << std::endl;
-        close(clientSocket);
-    }
-
-    std::string receivedMessage(buf, 0, bytesReceived);
-    std::cout << "Received: " << receivedMessage << std::endl;
-    logFile << "Received: " << receivedMessage << std::endl;
-
-    int bytesSent = send(clientSocket, buf, bytesReceived, 0);
-    if (bytesSent == -1) {
-        std::cerr << "Error sending message back to client" << std::endl;
-    }
-
-    std::cout << "Echoed message back to client" << std::endl;
-
-    logFile.close();
-}
-
-bool configureClient(int epollFd, int clientSocket) {
-    //configuring the client socket to be non-blocking and adding it to the epoll
-    if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1) {
-        std::cerr << "Failed to set non-blocking mode for clientSocket" << std::endl;
-        ::close(clientSocket);
-        return false;
-    }
-
-    struct epoll_event clientEvent;
-    clientEvent.events = EPOLLIN;
-    clientEvent.data.fd = clientSocket;
-    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, clientSocket, &clientEvent) == -1) {
-        std::cerr << "Failed to add client socket to epoll" << std::endl;
-        ::close(clientSocket);
-        return false;
-    }
-
-    std::cout << "Client successfully added to epoll" << std::endl;
-    return true;
-}
-
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -104,8 +19,6 @@ int main(int argc, char* argv[]) {
         return EINVAL;
     }
 
-    setSignal();
-
     int port = std::atoi(argv[1]);
     if (port <= 0 || port > 65535) {
         // Convert the error message to string using ostringstream
@@ -115,53 +28,29 @@ int main(int argc, char* argv[]) {
         return -2;
     }
 
-    Socket serverSocket;
+    Server server(logger, port);
+    HandleUser handleUser;
 
-    if (!serverSocket.create()) {
-        // Convert the error message to string using ostringstream
-        std::ostringstream oss;
-        oss << "Can't create a socket!";
-        logger.error(oss.str());
-        return -3;
+    int epollFd = server.getEpollFd();
+
+    int serverFd = server.getSocket().getFd();
+    if (serverFd <= 0) {
+        logger.error("Invalid server socket file descriptor");
+        exit(-1);
     }
 
-    if (!serverSocket.bind(port)) {
-        // Convert the error message to string using ostringstream
-        std::ostringstream oss;
-        oss << "Can't bind to IP/port " << port;
-        logger.error(oss.str());
-        return -4;
-    }
-
-    if (!serverSocket.listen()) {
-        // Convert the error message to string using ostringstream
-        std::ostringstream oss;
-        oss << "Can't listen!";
-        logger.error(oss.str());
-        return -5;
-    }
-
-    // Convert the success message to string using ostringstream
-    std::ostringstream oss;
-    oss << "Server listening on port " << port;
-    logger.info(oss.str());
-
-
-    int epollFd = epoll_create1(0);
-    if (epollFd == -1) {
-        logger.error("Failed to create epoll file descriptor");
-        return -1;
-    }
+    std::cout << "serverFd: "<< serverFd << std::endl;
 
     struct epoll_event ev, events[10];
     ev.events = EPOLLIN;
-    ev.data.fd = serverSocket.getSocket();
-    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, serverSocket.getSocket(), &ev) == -1) {
-        logger.error("Failed to add server socket to epoll");
-        return -1;
+    ev.data.fd = serverFd; // o erro e por conta que não consigo adicionar o servidor a lista do epoll
+    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, serverFd, &ev) == -1) {
+        logger.error("Failed to add server socket to epoll: " + std::string(strerror(errno)) + "\n");
+        exit(-1);
     }
 
-    while (!Signal) {
+
+    while (true) {
             sockaddr_in clientAddr;
             int numEvents = epoll_wait(epollFd, events, 10, -1);
             if (numEvents == -1) {
@@ -170,22 +59,21 @@ int main(int argc, char* argv[]) {
             }
 
             for (int i = 0; i < numEvents; i++) {
-                if (events[i].data.fd == serverSocket.getSocket()) {
-                    int clientSocket = serverSocket.accept(clientAddr);
+                if (events[i].data.fd == serverFd) {
+                    int clientSocket = server.getSocket().accept(clientAddr);
                             if (clientSocket == -1) {
                         std::cerr << "Accept failed!" << std::endl;
                         continue;
                     }
-                    if (!configureClient(epollFd, clientSocket)) {
+                    if (!handleUser.configureClient(epollFd, clientSocket)) {
                         std::cerr << "Failed to configure client" << std::endl;
                         continue;
                      }
                 }
                 else
-                    handleUser(events[i].data.fd);
+                    handleUser.handleUser(events[i].data.fd);
             }
     };
-    serverSocket.close();
-    //need to handle open file descriptors and close fds afetr a client disconnects
+    //need to handle open file descriptors and close fds after a client disconnects
     return 0;
 }

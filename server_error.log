@@ -1,1 +1,23 @@
-Usage: ./ircserver <port>Can't bind to IP/port 4444Usage: ./ircserver <port>Can't bind to IP/port 8080Can't bind to IP/port 8080Can't bind to IP/port 8080Can't bind to IP/port 444
+Usage: ./ircserver <port>Can't bind to IP/port 4444Usage: ./ircserver <port>Can't bind to IP/port 8080Can't bind to IP/port 8080Can't bind to IP/port 8080Can't bind to IP/port 444Can't bind to IP/port 4444Can't bind to IP/port 4444Failed to wait for eventsCan't bind to IP/port 4444Can't bind to IP/port 4444Failed to wait for eventsCan't bind to IP/port 4444Failed to add server socket to epollFailed to add server socket to epollFailed to add server socket to epollFailed to add server socket to epoll
+Failed to add server socket to epoll
+Failed to add server socket to epoll
+Failed to add server socket to epoll
+Failed to add server socket to epoll
+Failed to add server socket to epoll: Bad file descriptorFailed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Operation not permitted
+Failed to add server socket to epoll: Operation not permitted
+Failed to add server socket to epoll: Bad file descriptor
+Failed to create epoll file descriptorFailed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Invalid server socket file descriptorFailed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptor
+Failed to add server socket to epoll: Bad file descriptorFailed to add server socket to epoll: Bad file descriptor
+Invalid server socket file descriptor

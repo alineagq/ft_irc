@@ -1,4 +1,4 @@
-#include "Socket.hpp"
+#include "../../include/network/Socket.hpp"
 #include <unistd.h>
 #include <cstring>
 
@@ -38,6 +38,6 @@ void Socket::close() {
     sock = -1;
 }
 
-int Socket::getSocket() const {
+int Socket::getFd() const {
     return sock;
 }
