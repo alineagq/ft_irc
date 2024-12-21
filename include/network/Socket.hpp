@@ -13,6 +13,7 @@ public:
     bool bind(unsigned short port);
     bool listen(int backlog = SOMAXCONN);
     int accept(sockaddr_in& clientAddr);
+    int setSocketLinger();
     int getFd() const;
     void close();
 

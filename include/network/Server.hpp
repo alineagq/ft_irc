@@ -1,33 +1,35 @@
-#ifndef SERVER_HPP
-# define SERVER_HPP
+#pragma once
 
+#include <unistd.h>
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <sys/epoll.h>
-#include <cerrno>
 #include <fcntl.h>
-#include <signal.h>
 #include <cstdlib>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
 #include "Socket.hpp"
 #include "../auth/User.hpp"
 #include "../logger/Logger.hpp"
 #include "../../include/network/Socket.hpp"
+#include "../../include/core/IServer.hpp"
 
-class Server {
+class Server: public IServer {
     public:
         Server();
         Server(Logger& logger, int port);
         ~Server();
         Server &operator=(Server &other);
 
-        void handleUser(int clientSocket);
+        void addUser(const User& user);
         static void signalHandler(int signum);
+        void closeFds();
 
         Socket& getSocket();
-        int getEpollFd() const;
+        int& getEpollFd();
         static bool getSignal();
+        std::vector<User> getUsers();
 
     private:
         int _epollFd;
@@ -35,14 +37,4 @@ class Server {
         static bool _Signal;
         Socket _serverSocket;
         std::vector<User> _users;
-        // std::vector<UserHandler> _userHandlers;
-        // std::vector<Channel> _channels;
-        // std::vector<ChannelHandler> _channelHandlers;
-        // std::vector<Message> _messages;
-        // std::vector<MessageHandler> _messageHandlers;
-        // std::vector<Command> _commands;
-        // std::vector<CommandHandler> _commandHandlers;
-        // std::vector<ServerHandler> _serverHandlers;
 };
-
-#endif

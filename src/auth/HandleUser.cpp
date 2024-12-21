@@ -52,7 +52,7 @@ void HandleUser::handleUser(int clientSocket) {
     // logFile.close();
 }
 
-bool HandleUser::configureClient(int epollFd, int clientSocket) {
+bool HandleUser::configureClient(IServer& server, int clientSocket, int epollFd) {
     //configuring the client socket to be non-blocking and adding it to the epoll
     if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1) {
         std::cerr << "Failed to set non-blocking mode for clientSocket" << std::endl;
@@ -69,6 +69,7 @@ bool HandleUser::configureClient(int epollFd, int clientSocket) {
         return false;
     }
 
+    server.addUser(User(clientSocket));
     std::cout << "Client successfully added to epoll" << std::endl;
     return true;
 }

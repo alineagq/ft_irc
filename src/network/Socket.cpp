@@ -27,6 +27,13 @@ bool Socket::listen(int backlog) {
     return ::listen(sock, backlog) != -1;
 }
 
+int Socket::setSocketLinger() {
+    struct linger lingerOpt;
+    lingerOpt.l_onoff = 1;  // Ativar SO_LINGER
+    lingerOpt.l_linger = 0; // Fechar imediatamente
+    
+    return ::setsockopt(sock, SOL_SOCKET, SO_LINGER, &lingerOpt, sizeof(lingerOpt));
+}
 
 int Socket::accept(sockaddr_in& clientAddr) {
     socklen_t clientSize = sizeof(clientAddr);

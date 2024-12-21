@@ -1,20 +1,23 @@
-#ifndef USER_HPP
-# define USER_HPP
+#pragma once
 
+#include <unistd.h>
 #include <iostream>
+#include <netdb.h>
 
 class User {
     public:
         User();
-        User(int &fd);
+        User(int &socket);
         ~User();
-        User &operator=(User &other);
+        User &operator=(const User &other);
+
+        void closeSocket();
+
+        int getSocket();
     private:
-        int _fd;
+        char host[NI_MAXHOST];
+        int _socketFd;
         std::string _name;
         std::string _nickname;
-        std::string _password;
+        // std::string _password;
 };
-
-#endif
-

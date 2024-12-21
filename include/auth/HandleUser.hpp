@@ -1,5 +1,4 @@
-#ifndef HANDLEUSER_HPP
-# define HANDLEUSER_HPP
+#pragma once
 
 #include <iostream>
 #include <sys/epoll.h>
@@ -7,6 +6,7 @@
 #include <cstring>
 #include <sys/socket.h>
 #include <fcntl.h>
+#include "../../include/core/IServer.hpp"
 
 class HandleUser {
     public:
@@ -15,10 +15,8 @@ class HandleUser {
         HandleUser &operator=(HandleUser &other);
 
         void handleUser(int clientSocket);
-        bool configureClient(int epollFd, int clientSocket);
+        bool configureClient(IServer& Server, int clientSocket, int epollFd);
     private:
         int _serverSocket;
 
 };
-
-#endif
