@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <fcntl.h>
-#include "../../include/core/IServer.hpp"
+#include <sys/socket.h>
 
 class HandleMessages {
     public:

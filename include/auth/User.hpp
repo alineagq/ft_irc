@@ -19,5 +19,4 @@ class User {
         int _socketFd;
         std::string _name;
         std::string _nickname;
-        // std::string _password;
 };

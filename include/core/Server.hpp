@@ -9,11 +9,11 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cstring>
-#include "Socket.hpp"
+#include "../network/Socket.hpp"
 #include "../auth/User.hpp"
 #include "../logger/Logger.hpp"
 #include "../../include/network/Socket.hpp"
-#include "../../include/core/IServer.hpp"
+#include "../../include/interfaces/IServer.hpp"
 
 class Server: public IServer {
     public:

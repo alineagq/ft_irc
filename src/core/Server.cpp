@@ -1,4 +1,4 @@
-#include "../../include/network/Server.hpp"
+#include "../../include/core/Server.hpp"
 
 Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port) {
     if (_epollFd == -1) {

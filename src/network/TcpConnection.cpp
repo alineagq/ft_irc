@@ -1,4 +1,4 @@
-#include "TcpConnection.hpp"
+#include "../../include/network/TcpConnection.hpp"
 
 TcpConnection::TcpConnection(int socket, const sockaddr_in& clientAddr)
     : clientSocket(socket), clientAddr(clientAddr) {}

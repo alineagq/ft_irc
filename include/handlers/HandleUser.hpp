@@ -6,7 +6,7 @@
 #include <cstring>
 #include <sys/socket.h>
 #include <fcntl.h>
-#include "../../include/core/IServer.hpp"
+#include "../../include/interfaces/IServer.hpp"
 
 class HandleUser {
     public:

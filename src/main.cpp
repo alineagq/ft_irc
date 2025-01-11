@@ -6,7 +6,7 @@
 #include <cerrno>
 #include <signal.h>
 #include "../include/logger/Logger.hpp"
-#include "../include/network/Server.hpp"
+#include "../include/core/Server.hpp"
 #include "../include/handlers/HandleUser.hpp"
 #include "../include/handlers/HandleMessages.hpp"
 
