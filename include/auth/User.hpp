@@ -15,7 +15,7 @@ class User {
 
         int getSocket();
     private:
-        char host[NI_MAXHOST];
+        // char host[NI_MAXHOST];
         int _socketFd;
         std::string _name;
         std::string _nickname;

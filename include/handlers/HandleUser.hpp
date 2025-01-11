@@ -14,7 +14,6 @@ class HandleUser {
         ~HandleUser();
         HandleUser &operator=(HandleUser &other);
 
-        void handleUser(int clientSocket);
         bool configureClient(IServer& Server, int clientSocket, int epollFd);
     private:
         int _serverSocket;

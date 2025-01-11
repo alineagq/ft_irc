@@ -7,7 +7,8 @@
 #include <signal.h>
 #include "../include/logger/Logger.hpp"
 #include "../include/network/Server.hpp"
-#include "../include/auth/HandleUser.hpp"
+#include "../include/handlers/HandleUser.hpp"
+#include "../include/handlers/HandleMessages.hpp"
 
 void setSignals();
 Logger logger("server.log", "server_error.log");
@@ -51,6 +52,7 @@ int main(int argc, char* argv[]) {
 
 
     struct epoll_event ev, events[10];
+    memset(&ev, 0, sizeof(ev));
     ev.events = EPOLLIN;
     ev.data.fd = serverFd;
     // Add the server socket to the epoll
@@ -81,7 +83,7 @@ int main(int argc, char* argv[]) {
                     }
                 }
                 else
-                    handleUser.handleUser(events[i].data.fd);
+                    HandleMessages::handleMessage(events[i].data.fd);
             }
     };
     server.closeFds();

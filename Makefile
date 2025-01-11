@@ -8,7 +8,7 @@ OBDIR       = .obj
 
 SRC         = src/network/Socket.cpp src/network/TcpConnection.cpp \
 			src/network/Logger.cpp  src/auth/User.cpp src/network/Server.cpp \
-			src/auth/HandleUser.cpp  src/main.cpp
+			src/auth/HandleUser.cpp  src/main.cpp src/handlers/HandleMessages.cpp
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBDIR)/%.o, $(SRC))
 
 INCLUDE_DIR = src/network
