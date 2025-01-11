@@ -3,12 +3,12 @@
 #include <vector>
 #include <string>
 #include "../auth/User.hpp"
-#include "Channel.hpp"
+#include "../core/Channel.hpp"
 
 class CommandHandler
 {
 private:
-    std::map<int, User> *m_users;
+    std::vector<User> *m_users;
     std::map<std::string, Channel> *m_channels;
     std::string m_serverPassword;
 

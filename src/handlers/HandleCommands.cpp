@@ -1,4 +1,4 @@
-#include "CommandHandler.hpp"
+#include "../../include/handlers/HandleCommands.hpp"
 #include <cstdlib>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -16,7 +16,7 @@ CommandHandler::~CommandHandler()
 {
 }
 
-void CommandHandler::init(std::map<int, User> *users,
+void CommandHandler::init(std::vector<User> *users,
                           std::map<std::string, Channel> *channels,
                           const std::string &password)
 {
@@ -179,12 +179,12 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
     else
     {
         bool found = false;
-        std::map<int, User>::iterator it = m_users->begin();
+        std::vector<User>::iterator it = m_users->begin();
         while (it != m_users->end())
         {
-            if (it->second.getNickname() == target)
+            if (it->getNickname() == target)
             {
-                sendMsg(it->first, fullMsg);
+                sendMsg(it->getSocket(), fullMsg);
                 found = true;
                 break;
             }
@@ -217,12 +217,12 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         return;
     }
     int victimFd = -1;
-    std::map<int, User>::iterator it = m_users->begin();
+    std::vector<User>::iterator it = m_users->begin();
     while (it != m_users->end())
     {
-        if (it->second.getNickname() == nick && ch.hasUser(it->first))
+        if (it->getNickname() == nick && ch.hasUser(it->getSocket()))
         {
-            victimFd = it->first;
+            victimFd = it->getSocket();
             break;
         }
         ++it;
@@ -259,12 +259,12 @@ void CommandHandler::cmdInvite(const std::string &param, int fd)
         return;
     }
     int invitedFd = -1;
-    std::map<int, User>::iterator it = m_users->begin();
+    std::vector<User>::iterator it = m_users->begin();
     while (it != m_users->end())
     {
-        if (it->second.getNickname() == nick)
+        if (it->getNickname() == nick)
         {
-            invitedFd = it->first;
+            invitedFd = it->getSocket();
             break;
         }
         ++it;
