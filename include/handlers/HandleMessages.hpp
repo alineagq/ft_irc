@@ -5,10 +5,13 @@
 #include <cstring>
 #include <fcntl.h>
 #include <sys/socket.h>
+#include "HandleCommands.hpp"
 
 class HandleMessages {
     public:
         HandleMessages();
         ~HandleMessages();
         static void handleMessage(int clientSocket);
+    private:
+        
 };

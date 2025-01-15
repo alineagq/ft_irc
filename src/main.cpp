@@ -83,7 +83,9 @@ int main(int argc, char* argv[]) {
                     }
                 }
                 else
-                    HandleMessages::handleMessage(events[i].data.fd);
+                {
+                    server.handleClientData(events[i].data.fd);
+                }
             }
     };
     server.closeFds();

@@ -56,12 +56,12 @@ void User::closeSocket() {
     }
 }
 
-// void User::appendBuffer(const std::string &data)
-// {
-//     _buffer += data;
-// }
+void User::appendBuffer(const std::string &data)
+{
+    _buffer += data;
+}
 
-// std::string &User::getBufferRef()
-// {
-//     return _buffer;
-// }
+std::string &User::getBufferRef()
+{
+    return _buffer;
+}

@@ -23,7 +23,11 @@ bool HandleUser::configureClient(IServer& server, int clientSocket, int epollFd)
         return false;
     }
 
-    server.addUser(User(clientSocket));
+    User newUser(clientSocket);
+    server.addUser(newUser);
     std::cout << "Client successfully added to epoll" << std::endl;
+    std::cout << "Received Client socket: " << clientSocket << std::endl;
+    std::cout << "Server Client socket: " << newUser.getSocket() << std::endl;
+
     return true;
 }

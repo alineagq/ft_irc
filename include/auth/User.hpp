@@ -24,8 +24,8 @@ class User {
         int getSocket();
         void closeSocket();
 
-        // void appendBuffer(const std::string &data);
-        // std::string &getBufferRef();
+        void appendBuffer(const std::string &data);
+        std::string &getBufferRef();
 
     private:
         // char host[NI_MAXHOST];
@@ -34,4 +34,5 @@ class User {
         std::string _nickname;
         bool _authenticated;
         bool _isOperator;
+        std::string _buffer;
 };

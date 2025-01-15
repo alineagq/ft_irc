@@ -57,6 +57,32 @@ Server::~Server() {
     _serverSocket.close();
 }
 
+void Server::handleClientData(int clientFd)
+{
+    char buf[512];
+    std::memset(buf, 0, sizeof(buf));
+
+    int recvBytes = recv(clientFd, buf, 511, 0);
+    if (recvBytes <= 0)
+    {
+        return;
+    }
+    _users[clientFd].appendBuffer(std::string(buf));
+    std::string &bufferRef = _users[clientFd].getBufferRef();
+    std::string::size_type pos = bufferRef.find("\\r\\n");
+    std::cout << "buff ref: " << bufferRef << std::endl;
+    std::cout << "pos: " << pos << std::endl;
+    while (pos != std::string::npos)
+    {
+        std::string line = bufferRef.substr(0, pos);
+        bufferRef.erase(0, pos + 2);
+        std::cout << "Client command: " << line << std::endl;
+        _commandHandler.processCommand(line, clientFd);
+        pos = bufferRef.find("\\r\\n");
+    }
+}
+
+
 void Server::signalHandler(int signum)
 {
 	(void)signum;
@@ -76,22 +102,22 @@ bool Server::getSignal() {
     return _Signal;
 }
 
-void Server::addUser(const User& user) {
-    _users.push_back(user);
+void Server::addUser(User& user) {
+    _users[user.getSocket()] = user;
 }
 
 void Server::closeFds() {
-    for (std::vector<User>::iterator it = _users.begin(); it != _users.end(); it++) {
-        if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, it->getSocket(), NULL) == -1)
+    for (std::map<int, User>::iterator it = _users.begin(); it != _users.end(); it++) {
+        if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, it->first, NULL) == -1)
         {
             // oss << "Failed to remove client socket from epoll: " << strerror(errno) << std::endl;
             std::cerr << "Failed to remove client socket from epoll: " << strerror(errno) << std::endl;
         }
-        it->closeSocket();
-        it = _users.erase(it);
+        it->second.closeSocket();
+        _users.erase(it);
     }   
 }
 
-std::vector<User> Server::getUsers() {
+std::map<int, User> Server::getUsers() {
     return _users;
 }

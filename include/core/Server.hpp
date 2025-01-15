@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <sstream>
-#include <vector>
+#include <map>
 #include <sys/epoll.h>
 #include <fcntl.h>
 #include <cstdlib>
@@ -14,6 +14,7 @@
 #include "../logger/Logger.hpp"
 #include "../../include/network/Socket.hpp"
 #include "../../include/interfaces/IServer.hpp"
+#include "../handlers/HandleCommands.hpp"
 
 class Server: public IServer {
     public:
@@ -22,19 +23,22 @@ class Server: public IServer {
         ~Server();
         Server &operator=(Server &other);
 
-        void addUser(const User& user);
+        void addUser(User& user);
         static void signalHandler(int signum);
         void closeFds();
 
         Socket& getSocket();
         int& getEpollFd();
         static bool getSignal();
-        std::vector<User> getUsers();
+        std::map<int, User> getUsers();
+        
+        void handleClientData(int clientFd);
 
     private:
         int _epollFd;
         int _port;
         static bool _Signal;
         Socket _serverSocket;
-        std::vector<User> _users;
+        std::map<int, User> _users;
+        CommandHandler _commandHandler;
 };

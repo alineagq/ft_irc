@@ -22,28 +22,26 @@ void HandleMessages::handleMessage(int clientSocket) {
     //     return;
     // }
 
-    memset(buf, 0, sizeof(buf));
+    char buf[512];
+    std::memset(buf, 0, sizeof(buf));
 
-    int bytesReceived = recv(clientSocket, buf, sizeof(buf) - 1, 0);
-    if (bytesReceived == -1) {
-        std::cerr << "There was a connection issue" << std::endl;
+    int clientFd = _fds[index].fd;
+    // int recvBytes = recv(clientFd, buf, 511, 0);
+    // if (recvBytes <= 0)
+    // {
+    //     disconnectClient(index);
+    //     return;
+    // }
+    _users[clientFd].appendBuffer(std::string(buf));
+    std::string &bufferRef = _users[clientFd].getBufferRef();
+    std::string::size_type pos = bufferRef.find("\r\n");
+    while (pos != std::string::npos)
+    {
+        std::string line = bufferRef.substr(0, pos);
+        bufferRef.erase(0, pos + 2);
+        std::cout << "Client command: " << line << std::endl;
+        _commandHandler.processCommand(line, clientFd);
+        pos = bufferRef.find("\r\n");
     }
-
-    if (bytesReceived == 0) {
-        std::cout << "The client disconnected" << std::endl;
-        close(clientSocket);
-    }
-
-    std::string receivedMessage(buf, 0, bytesReceived);
-    std::cout << "Received: " << receivedMessage << std::endl;
-    // logFile << "Received: " << receivedMessage << std::endl;
-
-    int bytesSent = send(clientSocket, buf, bytesReceived, 0);
-    if (bytesSent == -1) {
-        std::cerr << "Error sending message back to client" << std::endl;
-    }
-
-    std::cout << "Echoed message back to client" << std::endl;
-
     // logFile.close();
 }

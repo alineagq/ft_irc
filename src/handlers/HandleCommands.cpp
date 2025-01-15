@@ -16,7 +16,7 @@ CommandHandler::~CommandHandler()
 {
 }
 
-void CommandHandler::init(std::vector<User> *users,
+void CommandHandler::init(std::map<int, User> *users,
                           std::map<std::string, Channel> *channels,
                           const std::string &password)
 {
@@ -43,7 +43,6 @@ void CommandHandler::processCommand(const std::string &line, int fd)
     std::vector<std::string> tokens = split(line, ' ');
     if (tokens.empty())
         return;
-
     std::string command = tokens[0];
     std::string param;
     if (tokens.size() > 1)
@@ -54,7 +53,9 @@ void CommandHandler::processCommand(const std::string &line, int fd)
     }
     for (std::string::size_type i = 0; i < command.size(); i++)
         command[i] = static_cast<char>(std::toupper(command[i]));
+    std::cout << "token: " << tokens[0] << std::endl;
 
+    // fazer mapeamento de funções
     if (command == "PASS")
         cmdPass(param, fd);
     else if (command == "NICK")
@@ -106,6 +107,7 @@ void CommandHandler::cmdNick(const std::string &param, int fd)
         return;
     }
     (*m_users)[fd].setNickname(tokens[0]);
+    std::cout << "amigo isto aqui" << std::endl;
     sendMsg(fd, "Nickname set.\r\n");
 }
 
@@ -179,12 +181,12 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
     else
     {
         bool found = false;
-        std::vector<User>::iterator it = m_users->begin();
+        std::map<int, User>::iterator it = m_users->begin();
         while (it != m_users->end())
         {
-            if (it->getNickname() == target)
+            if (it->second.getNickname() == target)
             {
-                sendMsg(it->getSocket(), fullMsg);
+                sendMsg(it->first, fullMsg);
                 found = true;
                 break;
             }
@@ -217,12 +219,12 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         return;
     }
     int victimFd = -1;
-    std::vector<User>::iterator it = m_users->begin();
+    std::map<int, User>::iterator it = m_users->begin();
     while (it != m_users->end())
     {
-        if (it->getNickname() == nick && ch.hasUser(it->getSocket()))
+        if (it->second.getNickname() == nick && ch.hasUser(it->first))
         {
-            victimFd = it->getSocket();
+            victimFd = it->first;
             break;
         }
         ++it;
@@ -259,12 +261,12 @@ void CommandHandler::cmdInvite(const std::string &param, int fd)
         return;
     }
     int invitedFd = -1;
-    std::vector<User>::iterator it = m_users->begin();
+    std::map<int, User>::iterator it = m_users->begin();
     while (it != m_users->end())
     {
-        if (it->getNickname() == nick)
+        if (it->second.getNickname() == nick)
         {
-            invitedFd = it->getSocket();
+            invitedFd = it->first;
             break;
         }
         ++it;
@@ -393,6 +395,7 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
 
 void CommandHandler::sendMsg(int fd, const std::string &msg)
 {
+    std::cout << "Sending to " << fd << ": " << msg;
     ::send(fd, msg.c_str(), msg.size(), 0);
 }
 
@@ -402,7 +405,7 @@ void CommandHandler::broadcastChannel(const std::string &channelName, const std:
         return;
     Channel &ch = (*m_channels)[channelName];
     const std::map<int,bool> &userMap = ch.getUserMap();
-    std::map<int,bool>::const_iterator it = userMap.begin();
+    std::map<int, bool>::const_iterator it = userMap.begin();
     while (it != userMap.end())
     {
         ::send(it->first, msg.c_str(), msg.size(), 0);

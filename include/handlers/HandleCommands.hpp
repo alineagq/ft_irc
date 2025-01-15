@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <vector>
 #include <string>
 #include "../auth/User.hpp"
@@ -8,7 +9,7 @@
 class CommandHandler
 {
 private:
-    std::vector<User> *m_users;
+    std::map<int, User> *m_users;
     std::map<std::string, Channel> *m_channels;
     std::string m_serverPassword;
 
@@ -16,7 +17,7 @@ public:
     CommandHandler();
     ~CommandHandler();
 
-    void init(std::vector<User> *users,
+    void init(std::map<int, User> *users,
               std::map<std::string, Channel> *channels,
               const std::string &password);
 
