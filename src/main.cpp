@@ -4,15 +4,12 @@
 #include <vector>
 #include <sys/epoll.h>
 #include <cerrno>
-#include <signal.h>
 #include "../include/logger/Logger.hpp"
 #include "../include/core/Server.hpp"
 #include "../include/handlers/HandleUser.hpp"
 #include "../include/handlers/HandleMessages.hpp"
 
-void setSignals();
 Logger logger("server.log", "server_error.log");
-bool Server::_Signal = false;
  //-> initialize the static boolean
 
 int main(int argc, char* argv[]) {
@@ -34,65 +31,8 @@ int main(int argc, char* argv[]) {
     }
 
     Server server(logger, port);
-    HandleUser handleUser;
-
-    int epollFd = server.getEpollFd();
-    int serverFd = server.getSocket().getFd();
-    if (serverFd <= 0) {
-        logger.error("Invalid server socket file descriptor");
-        exit(EXIT_FAILURE);
-    }
-
-    try {
-        setSignals();
-    } catch (std::exception& e) {
-        logger.error("Failed to set signals: " + std::string(e.what()));
-        exit(EXIT_FAILURE);
-    }
-
-
-    struct epoll_event ev, events[10];
-    memset(&ev, 0, sizeof(ev));
-    ev.events = EPOLLIN;
-    ev.data.fd = serverFd;
-    // Add the server socket to the epoll
-    if (epoll_ctl(epollFd, EPOLL_CTL_ADD, serverFd, &ev) == -1) {
-        logger.error("Failed to add server socket to epoll: " + std::string(strerror(errno)) + "\n");
-        exit(EXIT_FAILURE);
-    }
-    while (Server::getSignal() == false) {
-            sockaddr_in clientAddr;
-            // wait for events on the epoll
-            int numEvents = epoll_wait(epollFd, events, 10, -1);
-            if (numEvents == -1) {
-                logger.error("Failed to wait for events");
-                return -1;
-            }
-            //handle the events
-            for (int i = 0; i < numEvents; i++) {
-                if (events[i].data.fd == serverFd)
-                {
-                    int clientSocket = server.getSocket().accept(clientAddr);
-                    if (clientSocket == -1) {
-                        logger.error("Failed to accept client connection: " + std::string(strerror(errno)));
-                        continue;
-                    }
-                    if (!handleUser.configureClient(server, clientSocket, epollFd)) {
-                        logger.error("Failed to configure client");
-                        continue;
-                    }
-                }
-                else
-                {
-                    server.handleClientData(events[i].data.fd);
-                }
-            }
-    };
-    server.closeFds();
+    server.run();
+    
     return 0;
 }
 
-void setSignals() {
-    signal(SIGINT, Server::signalHandler);
-    signal(SIGQUIT, Server::signalHandler);
-}
