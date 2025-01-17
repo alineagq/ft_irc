@@ -33,6 +33,7 @@ private:
     void cmdInvite(const std::string &param, int fd);
     void cmdTopic(const std::string &param, int fd);
     void cmdMode(const std::string &param, int fd);
+	void cmdCap(const std::string &param, int fd);
 
     void sendMsg(int fd, const std::string &msg);
     void broadcastChannel(const std::string &channelName, const std::string &msg);

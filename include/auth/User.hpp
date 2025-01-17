@@ -27,6 +27,9 @@ class User {
         void appendBuffer(const std::string &data);
         std::string &getBufferRef();
 
+		void setCapNegotiationComplete(bool value);
+		bool isCapNegotiationComplete() const;
+
     private:
         // char host[NI_MAXHOST];
         int _socketFd;
@@ -35,4 +38,5 @@ class User {
         bool _authenticated;
         bool _isOperator;
         std::string _buffer;
+		bool _capNegotiationComplete;
 };

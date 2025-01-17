@@ -13,7 +13,7 @@ Logger logger("server.log", "server_error.log");
  //-> initialize the static boolean
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
+    if (argc != 3) {
         // Convert the error message to string using ostringstream
         std::ostringstream oss;
         oss << "Usage: " << argv[0] << " <port>";
@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
         return EINVAL;
     }
 
+	std::string password = argv[2];
     int port = std::atoi(argv[1]);
     if (port <= 0 || port > 65535) {
         // Convert the error message to string using ostringstream
@@ -30,7 +31,7 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    Server server(logger, port);
+    Server server(logger, port, password);
     server.run();
     
     return 0;

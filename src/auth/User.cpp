@@ -65,3 +65,11 @@ std::string &User::getBufferRef()
 {
     return _buffer;
 }
+
+void User::setCapNegotiationComplete(bool value) {
+	_capNegotiationComplete = value;
+}
+
+bool User::isCapNegotiationComplete() const {
+	return _capNegotiationComplete;
+}

@@ -56,6 +56,7 @@ void CommandHandler::processCommand(const std::string &line, int fd)
     std::cout << "token: " << tokens[0] << std::endl;
 
     // fazer mapeamento de funções
+	// implementar CAP LS
     if (command == "PASS")
         cmdPass(param, fd);
     else if (command == "NICK")
@@ -113,6 +114,11 @@ void CommandHandler::cmdNick(const std::string &param, int fd)
 
 void CommandHandler::cmdUser(const std::string &param, int fd)
 {
+	if (!(*m_users)[fd].isCapNegotiationComplete())
+    {
+        sendMsg(fd, "Finish CAP negotiation first.\r\n");
+        return;
+    }
     std::vector<std::string> tokens = split(param, ' ');
     if (tokens.empty())
     {
@@ -391,6 +397,43 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
         i++;
     }
     broadcastChannel(channelName, "Channel mode updated.\r\n");
+}
+
+void CommandHandler::cmdCap(const std::string &param, int fd)
+{
+    std::vector<std::string> tokens = split(param, ' ');
+    if (tokens.empty())
+    {
+        sendMsg(fd, "Usage: CAP <subcommand> [params]\r\n");
+        return;
+    }
+
+    std::string subcommand = tokens[0];
+    for (std::string::size_type i = 0; i < subcommand.size(); i++)
+        subcommand[i] = static_cast<char>(std::toupper(subcommand[i]));
+
+    if (subcommand == "LS")
+    {
+        sendMsg(fd, ":server CAP * LS :multi-prefix sasl\r\n");
+    }
+    else if (subcommand == "REQ")
+    {
+        if (tokens.size() < 2)
+        {
+            sendMsg(fd, "Usage: CAP REQ :<capabilities>\r\n");
+            return;
+        }
+        sendMsg(fd, ":server CAP * ACK :" + tokens[1] + "\r\n");
+    }
+    else if (subcommand == "END")
+	{
+		(*m_users)[fd].setCapNegotiationComplete(true);
+		sendMsg(fd, "CAP END\r\n");
+	}
+    else
+    {
+        sendMsg(fd, "Unknown CAP subcommand.\r\n");
+    }
 }
 
 void CommandHandler::sendMsg(int fd, const std::string &msg)

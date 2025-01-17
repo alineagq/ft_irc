@@ -1,6 +1,7 @@
 #include "../../include/core/Server.hpp"
 
-Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port) {
+Server::Server(Logger& logger, int port, std::string pw):
+							_epollFd(epoll_create1(0)), _port(port), _password(pw) {
     if (_epollFd == -1) {
         logger.error("Failed to create epoll file descriptor");
         exit(EXIT_FAILURE);
@@ -39,6 +40,7 @@ Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port
     }
 
     int serverSocketFd = _serverSocket.getFd();
+    // setSignals();
     // Convert the success message to string using ostringstream
      if (fcntl(serverSocketFd, F_SETFL, O_NONBLOCK) == -1) {
         std::cerr << "Failed to set non-blocking mode for clientSocket" << std::endl;
@@ -49,7 +51,7 @@ Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port
     oss << "Server listening on port " << port << std::endl;
     logger.info(oss.str());
 
-    _commandHandler.init(&_users, &_channels, "password");
+    _commandHandler.init(&_users, &_channels, _password);
 	_isRunning = false;
 }
 
@@ -164,9 +166,6 @@ void Server::handleClientData(int clientFd)
     int recvBytes = recv(clientFd, buf, 511, 0);
     if (recvBytes <= 0)
     {
-        _users.erase(clientFd);
-        close(clientFd);
-        std::cout << "Client disconnected" << std::endl;
         return;
     }
     _users[clientFd].appendBuffer(std::string(buf));

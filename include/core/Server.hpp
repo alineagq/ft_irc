@@ -20,10 +20,8 @@
 
 class Server: public IServer {
     public:
-        Server();
-        Server(Logger& logger, int port);
+        Server(Logger& logger, int port, std::string pw);
         ~Server();
-        Server &operator=(Server &other);
 		
 		bool run();
 		bool configureClient(int clientSocket);
@@ -45,9 +43,13 @@ class Server: public IServer {
     private:
         int _epollFd;
         int _port;
+		std::string _password;
         static bool _isRunning;
         Socket _serverSocket;
         std::map<int, User> _users;
-        CommandHandler _commandHandler;
         std::map<std::string, Channel> _channels;
+        CommandHandler _commandHandler;
+
+        Server();
+        Server &operator=(Server &other);
 };
