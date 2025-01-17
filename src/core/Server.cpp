@@ -39,7 +39,6 @@ Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port
     }
 
     int serverSocketFd = _serverSocket.getFd();
-    // setSignals();
     // Convert the success message to string using ostringstream
      if (fcntl(serverSocketFd, F_SETFL, O_NONBLOCK) == -1) {
         std::cerr << "Failed to set non-blocking mode for clientSocket" << std::endl;
@@ -57,11 +56,11 @@ Server::Server(Logger& logger, int port): _epollFd(epoll_create1(0)), _port(port
 bool Server::_isRunning;
 
 Server::~Server() {
+	closeFds();
     close(_epollFd);
 	std::cout << "epollFd: " << _epollFd << std::endl;
 	std::cout << "SSocket: " << _serverSocket.getFd() << std::endl;
     _serverSocket.close();
-	closeFds();
 }
 
 bool Server::run() {
@@ -165,6 +164,9 @@ void Server::handleClientData(int clientFd)
     int recvBytes = recv(clientFd, buf, 511, 0);
     if (recvBytes <= 0)
     {
+        _users.erase(clientFd);
+        close(clientFd);
+        std::cout << "Client disconnected" << std::endl;
         return;
     }
     _users[clientFd].appendBuffer(std::string(buf));
@@ -215,14 +217,23 @@ void Server::signalHandler(int signum)
 }
 
 void Server::closeFds() {
-    for (std::map<int, User>::iterator it = _users.begin(); it != _users.end(); it++) {
-        if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, it->first, NULL) == -1)
-        {
-            // oss << "Failed to remove client socket from epoll: " << strerror(errno) << std::endl;
-            std::cerr << "Failed to remove client socket from epoll: " << strerror(errno) << std::endl;
+    std::map<int, User>::iterator it = _users.begin();
+    while (it != _users.end()) {
+        if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, it->first, NULL) == -1) {
+            std::cerr << "Failed to remove client socket from epoll: "
+                      << strerror(errno) << std::endl;
         }
-		std::cout << "Closing socket: " << it->second.getSocket() << std::endl;
+        std::cout << "Closing socket: " << it->second.getSocket() << std::endl;
         it->second.closeSocket();
+
+        // Pegamos o próximo iterador aqui
+        std::map<int, User>::iterator nextIt = it;
+        ++nextIt;
+
+        // Agora podemos apagar usando 'it'
         _users.erase(it);
+
+        // Continuamos a iteração com nextIt
+        it = nextIt;
     }
 }
