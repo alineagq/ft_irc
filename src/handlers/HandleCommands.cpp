@@ -40,6 +40,7 @@ static std::vector<std::string> split(const std::string &str, char delim)
 
 void CommandHandler::processCommand(const std::string &line, int fd)
 {
+	std::cout << "line: "<< line << std::endl;
     std::vector<std::string> tokens = split(line, ' ');
     if (tokens.empty())
         return;
@@ -57,7 +58,9 @@ void CommandHandler::processCommand(const std::string &line, int fd)
 
     // fazer mapeamento de funções
 	// implementar CAP LS
-    if (command == "PASS")
+	if (command == "CAP")
+		cmdCap(param, fd);
+    else if (command == "PASS")
         cmdPass(param, fd);
     else if (command == "NICK")
         cmdNick(param, fd);
@@ -147,6 +150,7 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
         (*m_channels)[channelName] = Channel(channelName);
 
     (*m_channels)[channelName].addUser(fd, false);
+	std::cout << "Joining channel" << std::endl;
     sendMsg(fd, "Joined channel " + channelName + "\r\n");
     broadcastChannel(channelName, (*m_users)[fd].getNickname() + " joined " + channelName + "\r\n");
 }

@@ -170,7 +170,8 @@ void Server::handleClientData(int clientFd)
     }
     _users[clientFd].appendBuffer(std::string(buf));
     std::string &bufferRef = _users[clientFd].getBufferRef();
-    std::string::size_type pos = bufferRef.find("\\r\\n");
+	// inserir \\r\\n com "nc"
+    std::string::size_type pos = bufferRef.find("\r\n");
     std::cout << "buff ref: " << bufferRef << std::endl;
     std::cout << "pos: " << pos << std::endl;
     while (pos != std::string::npos)
@@ -179,7 +180,7 @@ void Server::handleClientData(int clientFd)
         bufferRef.erase(0, pos + 2);
         std::cout << "Client command: " << line << std::endl;
         _commandHandler.processCommand(line, clientFd);
-        pos = bufferRef.find("\\r\\n");
+        pos = bufferRef.find("\r\n");
     }
 }
 

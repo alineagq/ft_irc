@@ -7,7 +7,6 @@
 #include "../include/logger/Logger.hpp"
 #include "../include/core/Server.hpp"
 #include "../include/handlers/HandleUser.hpp"
-#include "../include/handlers/HandleMessages.hpp"
 
 Logger logger("server.log", "server_error.log");
  //-> initialize the static boolean
