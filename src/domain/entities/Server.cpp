@@ -1,42 +1,25 @@
-#include "../../include/core/Server.hpp"
+#include "Server.hpp"
 
 Server::Server(Logger& logger, int port, std::string pw):
 							_epollFd(epoll_create1(0)), _port(port), _password(pw) {
     if (_epollFd == -1) {
-        logger.error("Failed to create epoll file descriptor");
-        exit(EXIT_FAILURE);
+        throw ServerException("Failed to create epoll file descriptor");
     }
 
      if (!_serverSocket.create()) {
-        // Convert the error message to string using ostringstream
-        std::ostringstream oss;
-        oss << "Can't create a socket!";
-        logger.error(oss.str());
-        exit(EXIT_FAILURE);
+        throw ServerException("Failed to create a socket");
     }
 
     if (!_serverSocket.bind(port)) {
-        // Convert the error message to string using ostringstream
-        std::ostringstream oss;
-        oss << "Can't bind to IP/port " << port;
-        logger.error(oss.str());
-        exit(EXIT_FAILURE);
+        throw ServerException("Failed to bind the socket");
     }
 
     if (!_serverSocket.listen()) {
-        // Convert the error message to string using ostringstream
-        std::ostringstream oss;
-        oss << "Can't listen!";
-        logger.error(oss.str());
-        exit(EXIT_FAILURE);
+        throw ServerException("Failed to listen on the socket");
     }
 
     if (_serverSocket.setSocketLinger() == -1) {
-        // Convert the error message to string using ostringstream
-        std::ostringstream oss;
-        oss << "Can't set socket linger!";
-        logger.error(oss.str());
-        exit(EXIT_FAILURE);
+        throw ServerException("Failed to set socket linger");
     }
 
     int serverSocketFd = _serverSocket.getFd();

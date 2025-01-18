@@ -8,7 +8,7 @@
 class Logger {
 public:
 
-    Logger(const std::string& outputFile, const std::string& errorFile);
+    explicit Logger(const std::string& outputFile, const std::string& errorFile);
     ~Logger();
 
     void info(const std::string& message);

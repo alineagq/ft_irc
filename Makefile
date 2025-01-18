@@ -7,9 +7,10 @@ RM          = rm -rf
 OBDIR       = .obj
 
 SRC         = src/network/Socket.cpp src/network/TcpConnection.cpp \
-			src/logger/Logger.cpp  src/auth/User.cpp src/core/Server.cpp \
-			src/main.cpp src/handlers/HandleCommands.cpp\
-			src/core/Channel.cpp \
+			src/infrastructure/configuration/Logger.cpp  src/auth/User.cpp src/domain/entities/Server.cpp \
+			src/entrypoint/start_server.cpp src/handlers/HandleCommands.cpp\
+			src/core/Channel.cpp src/entrypoint/utils/utils.cpp \
+			src/domain/exceptions/ServerException.cpp \
 
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBDIR)/%.o, $(SRC))
 
@@ -39,7 +40,7 @@ clean:
 	@printf "$(YELLOW)    - Object files removed.$(RESET)\n"
 
 fclean: clean
-	@$(RM) $(NAME)
+	@$(RM) $(NAME) server_error.log server.log
 	@printf "$(YELLOW)    - Executable removed.$(RESET)\n"
 
 re: fclean all
