@@ -6,6 +6,7 @@ Server::Server(Logger& logger, int port, std::string pw):
         throw ServerException("Failed to create epoll file descriptor");
     }
 
+	//close epollfd
      if (!_serverSocket.create()) {
         throw ServerException("Failed to create a socket");
     }

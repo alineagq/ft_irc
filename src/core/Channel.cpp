@@ -24,32 +24,32 @@ const std::string &Channel::getName() const
     return _name;
 }
 
-void Channel::addUser(int fd, bool isOp)
+void Channel::addUser(std::string nick, bool isOp) //change
 {
-    _users[fd] = isOp;
+    _users[nick] = isOp;
 }
 
-void Channel::removeUser(int fd)
+void Channel::removeUser(std::string nick) //change
 {
-    _users.erase(fd);
+    _users.erase(nick);
 }
 
-bool Channel::hasUser(int fd) const
+bool Channel::hasUser(std::string nick) const //change
 {
-    return (_users.find(fd) != _users.end());
+    return (_users.find(nick) != _users.end());
 }
 
-bool Channel::isOperator(int fd) const
+bool Channel::isOperator(std::string nick) const //change
 {
-    std::map<int,bool>::const_iterator it = _users.find(fd);
+    std::map<std::string,bool>::const_iterator it = _users.find(nick);
     if (it != _users.end())
         return it->second;
     return false;
 }
 
-void Channel::setOperator(int fd, bool op)
+void Channel::setOperator(std::string nick, bool op) //change
 {
-    std::map<int,bool>::iterator it = _users.find(fd);
+    std::map<std::string, bool>::iterator it = _users.find(nick);
     if (it != _users.end())
         it->second = op;
 }
@@ -104,7 +104,7 @@ int Channel::getUserLimit() const
     return _userLimit;
 }
 
-const std::map<int,bool> &Channel::getUserMap() const
+const std::map<std::string,bool> &Channel::getUserMap() const
 {
     return _users;
 }

@@ -11,7 +11,7 @@
 #include <cstring>
 #include <signal.h>
 #include "../exceptions/ServerException.hpp"
-#include "../../include/network/Socket.hpp"
+#include "../../../include/network/Socket.hpp"
 #include "../../include/auth/User.hpp"
 #include "../infrastructure/configuration/Logger.hpp"
 #include "../../include/network/Socket.hpp"

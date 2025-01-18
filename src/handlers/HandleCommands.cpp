@@ -153,13 +153,15 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
         return;
     }
     std::string channelName = tokens[0];
-	User &user = (*m_users)[fd];
-	if (user.getNickname().empty())
+	std::string userNick = (*m_users)[fd].getNickname();
+	std::string username = (*m_users)[fd].getUsername();
+
+	if (userNick.empty())
 	{
 		sendMsg(fd, "You must set a nickname first.\r\n");
 		return;
 	}
-	if (user.getUsername().empty())
+	if (username.empty())
 	{
 		sendMsg(fd, "You must set a username first.\t\n");
 		return;
@@ -172,9 +174,9 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
     if (m_channels->find(channelName) == m_channels->end())
     {
 		(*m_channels)[channelName] = Channel(channelName);
-    	(*m_channels)[channelName].addUser(fd, true);
+    	(*m_channels)[channelName].addUser(userNick, true);
 	}
-	else if ((*m_channels)[channelName].hasUser(fd))
+	else if ((*m_channels)[channelName].hasUser(userNick))
 	{
 		sendMsg(fd, "Already in channel: " + channelName + "\r\n");
 		return;
@@ -185,12 +187,12 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
 		return;
 	}
 	else
-    	(*m_channels)[channelName].addUser(fd, false);
+    	(*m_channels)[channelName].addUser(userNick, false);
 
 
 	std::cout << "Joining channel" << std::endl;
     sendMsg(fd, "Joined channel " + channelName + "\r\n");
-    broadcastChannel(channelName, (*m_users)[fd].getNickname() + " joined " + channelName + "\r\n");
+    broadcastChannel(channelName, userNick + " joined " + channelName + "\r\n");
 }
 
 void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
@@ -212,10 +214,11 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
         i++;
     }
 	std::string fullMsg = "";
-	if ((*m_channels)[target].isOperator(fd) == true)
-    	fullMsg = "[OP]" + (*m_users)[fd].getNickname() + ": " + msg + "\r\n";
+	std::string userNick = (*m_users)[fd].getNickname();
+	if ((*m_channels)[target].isOperator(userNick) == true)
+    	fullMsg = "[OP]" + userNick + ": " + msg + "\r\n";
 	else
-		fullMsg = (*m_users)[fd].getNickname() + ": " + msg + "\r\n";
+		fullMsg = userNick + ": " + msg + "\r\n";
     if (target.size() > 0 && target[0] == '#')
     {
         if (m_channels->find(target) == m_channels->end())
@@ -223,7 +226,7 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
             sendMsg(fd, "No such channel.\r\n");
             return;
         }
-        if (!(*m_channels)[target].hasUser(fd))
+        if (!(*m_channels)[target].hasUser(userNick))
         {
             sendMsg(fd, "You're not on that channel.\r\n");
             return;
@@ -259,7 +262,7 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         return;
     }
     std::string channelName;
-    std::string nick;
+    std::string victimNick;
 	std::string message;
 	for (size_t i = 0; i < tokens.size(); i++)
     {
@@ -269,9 +272,9 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         }
         else if (tokens[i][0] == ':')
         {
-            if (nick.empty())
+            if (victimNick.empty())
             {
-                nick = tokens[i].substr(1); // Remover o ":"
+                victimNick = tokens[i].substr(1); // Remover o ":"
             }
         }
     }
@@ -288,7 +291,8 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         return;
     }
     Channel &ch = (*m_channels)[channelName];
-    if (!ch.hasUser(fd) || !ch.isOperator(fd))
+	std::string executorNick = (*m_users)[fd].getNickname();
+    if (!ch.hasUser(executorNick) || !ch.isOperator(executorNick))
     {
         sendMsg(fd, "You're not channel operator.\r\n");
         return;
@@ -297,7 +301,7 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
     std::map<int, User>::iterator it = m_users->begin();
     while (it != m_users->end())
     {
-        if (it->second.getNickname() == nick && ch.hasUser(it->first))
+        if (it->second.getNickname() == victimNick && ch.hasUser(victimNick))
         {
             victimFd = it->first;
             break;
@@ -310,10 +314,10 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         return;
     }
 	if (ch.getInviteOnly())
-		ch.removeInvitedUser((*m_users)[victimFd].getNickname());
-    ch.removeUser(victimFd);
+		ch.removeInvitedUser(victimNick);
+    ch.removeUser(victimNick);
     sendMsg(victimFd, "You were KICKED from " + channelName + ":" + message + "\r\n");
-    broadcastChannel(channelName, nick + " was kicked from channel.\r\n");
+    broadcastChannel(channelName, victimNick + " was kicked from channel.\r\n");
 }
 
 void CommandHandler::cmdInvite(const std::string &param, int fd)
@@ -332,7 +336,8 @@ void CommandHandler::cmdInvite(const std::string &param, int fd)
         return;
     }
     Channel &ch = (*m_channels)[channelName];
-    if (!ch.hasUser(fd) || !ch.isOperator(fd))
+	std::string executorNick = (*m_users)[fd].getNickname();
+    if (!ch.hasUser(executorNick) || !ch.isOperator(executorNick))
     {
         sendMsg(fd, "You're not channel operator.\r\n");
         return;
@@ -373,7 +378,8 @@ void CommandHandler::cmdTopic(const std::string &param, int fd)
         return;
     }
     Channel &ch = (*m_channels)[channelName];
-    if (!ch.hasUser(fd))
+	std::string executorNick = (*m_users)[fd].getNickname();
+    if (!ch.hasUser(executorNick))
     {
         sendMsg(fd, "You're not on that channel.\r\n");
         return;
@@ -384,7 +390,7 @@ void CommandHandler::cmdTopic(const std::string &param, int fd)
     }
     else
     {
-        if (ch.getTopicLocked() && !ch.isOperator(fd))
+        if (ch.getTopicLocked() && !ch.isOperator(executorNick))
         {
             sendMsg(fd, "Only operators can change the topic.\r\n");
             return;
@@ -419,7 +425,8 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
         return;
     }
     Channel &ch = (*m_channels)[channelName];
-    if (!ch.isOperator(fd))
+	std::string executorNick = (*m_users)[fd].getNickname();
+    if (!ch.isOperator(executorNick))
     {
         sendMsg(fd, "You're not channel operator.\r\n");
         return;
@@ -457,8 +464,8 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
         }
         else if (c == 'o')
         {
-            ch.setOperator(fd, add);
-            (*m_users)[fd].setOperator(add);
+			std::string promotedUser = tokens.back();
+            ch.setOperator(promotedUser, add);
         }
         else if (c == 'l')
         {
@@ -524,11 +531,14 @@ void CommandHandler::broadcastChannel(const std::string &channelName, const std:
     if (m_channels->find(channelName) == m_channels->end())
         return;
     Channel &ch = (*m_channels)[channelName];
-    const std::map<int,bool> &userMap = ch.getUserMap();
-    std::map<int, bool>::const_iterator it = userMap.begin();
-    while (it != userMap.end())
+    const std::map<std::string,bool> &channelUserMap = ch.getUserMap();
+	const std::map<int, User> &serverUserMap = *m_users;
+    std::map<int, User>::const_iterator it = serverUserMap.begin();
+    while (it != serverUserMap.end())
     {
-        ::send(it->first, msg.c_str(), msg.size(), 0);
+		std::string username =  it->second.getNickname();
+		if (channelUserMap.find(username) != channelUserMap.end())
+        	::send(it->first, msg.c_str(), msg.size(), 0);
         ++it;
     }
 }
@@ -546,9 +556,10 @@ void CommandHandler::cmdQuit(const std::string &param, int fd) {
 			msg += " ";
 	}
 	std::map<std::string, Channel>::iterator it = m_channels->begin();
+	std::string userNick = (*m_users)[fd].getNickname();
 	while (it != m_channels->end()) {
-		if (it->second.hasUser(fd)) {
-			it->second.removeUser(fd);
+		if (it->second.hasUser(userNick)) {
+			it->second.removeUser(userNick);
 			broadcastChannel(it->first, (*m_users)[fd].getNickname() + " left the channel.\r\n");
 		}
 		++it;
