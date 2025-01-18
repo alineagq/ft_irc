@@ -84,8 +84,11 @@ bool Channel::getTopicLocked() const
     return _topicLocked;
 }
 
+#include <iostream>
+
 void Channel::setKey(const std::string &key)
 {
+	std::cout << "KEY: " << key << std::endl;
     _key = key;
 }
 

@@ -187,7 +187,22 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
 		return;
 	}
 	else
-    	(*m_channels)[channelName].addUser(userNick, false);
+    {
+		if (!(*m_channels)[channelName].getKey().empty())
+		{
+			std::string key = (*m_channels)[channelName].getKey();
+			if (tokens.size() < 2 || tokens[1] != key)
+			{
+				sendMsg(fd, "Wrong channel key.\r\n");
+				return;
+			}
+			else
+				(*m_channels)[channelName].addUser(userNick, false);
+				
+		}
+		else
+			(*m_channels)[channelName].addUser(userNick, false);
+	}
 
 
 	std::cout << "Joining channel" << std::endl;
@@ -216,9 +231,9 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
 	std::string fullMsg = "";
 	std::string userNick = (*m_users)[fd].getNickname();
 	if ((*m_channels)[target].isOperator(userNick) == true)
-    	fullMsg = "[OP]" + userNick + ": " + msg + "\r\n";
+    	fullMsg = "[OP]" + userNick + " <" + target + ">: " + msg + "\r\n";
 	else
-		fullMsg = userNick + ": " + msg + "\r\n";
+		fullMsg = userNick + " <" + target + ">: "+ msg + "\r\n";
     if (target.size() > 0 && target[0] == '#')
     {
         if (m_channels->find(target) == m_channels->end())
@@ -409,6 +424,7 @@ void CommandHandler::cmdTopic(const std::string &param, int fd)
 
 void CommandHandler::cmdMode(const std::string &param, int fd)
 {
+	// adicioinar logica de setar um operador caso o ultimo operador saia do canal
     std::vector<std::string> tokens = split(param, ' ');
     if (tokens.size() < 2)
     {
@@ -454,13 +470,14 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
         }
         else if (c == 'k')
         {
-            if (tokens.size() > 2)
+            if (tokens.size() > 2 && add)
             {
-                if (add)
-                    ch.setKey(tokens[2]);
-                else
-                    ch.setKey("");
+				ch.setKey(tokens[2]);
             }
+			else if (!add)
+			{
+				ch.setKey("");
+			}
         }
         else if (c == 'o')
         {
