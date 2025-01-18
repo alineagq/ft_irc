@@ -108,3 +108,34 @@ const std::map<int,bool> &Channel::getUserMap() const
 {
     return _users;
 }
+
+void Channel::addInvtedUser(int fd, std::string nick)
+{
+	_invitedUsers[fd] = nick;
+}
+
+bool Channel::isInvited(std::string nick)
+{
+	std::map<int, std::string>::iterator it = _invitedUsers.begin();
+	while (it != _invitedUsers.end())
+	{
+		if (it->second == nick)
+			return true;
+		++it;
+	}
+	return false;
+}
+
+void Channel::removeInvitedUser(std::string nick)
+{
+	std::map<int, std::string>::iterator it = _invitedUsers.begin();
+	while (it != _invitedUsers.end())
+	{
+		if (it->second == nick)
+		{
+			_invitedUsers.erase(it);
+			break;
+		}
+		++it;
+	}
+}

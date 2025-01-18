@@ -40,7 +40,6 @@ static std::vector<std::string> split(const std::string &str, char delim)
 
 void CommandHandler::processCommand(const std::string &line, int fd)
 {
-	std::cout << "line: "<< line << std::endl;
     std::vector<std::string> tokens = split(line, ' ');
     if (tokens.empty())
         return;
@@ -54,7 +53,6 @@ void CommandHandler::processCommand(const std::string &line, int fd)
     }
     for (std::string::size_type i = 0; i < command.size(); i++)
         command[i] = static_cast<char>(std::toupper(command[i]));
-    std::cout << "token: " << tokens[0] << std::endl;
 
     // fazer mapeamento de funções
 	// implementar CAP LS
@@ -66,7 +64,7 @@ void CommandHandler::processCommand(const std::string &line, int fd)
         cmdNick(param, fd);
     else if (command == "USER")
         cmdUser(param, fd);
-    else if (command == "JOIN")
+    else if (command == "JOIN") // leak
         cmdJoin(param, fd);
     else if (command == "PRIVMSG")
         cmdPrivMsg(param, fd);
@@ -78,6 +76,8 @@ void CommandHandler::processCommand(const std::string &line, int fd)
         cmdTopic(param, fd);
     else if (command == "MODE")
         cmdMode(param, fd);
+	else if (command == "QUIT")
+		cmdQuit(param, fd);
     else
         sendMsg(fd, "Unknown command.\r\n");
 }
@@ -110,19 +110,31 @@ void CommandHandler::cmdNick(const std::string &param, int fd)
         sendMsg(fd, "Usage: NICK <nick>\r\n");
         return;
     }
+
+	std::map<int, User>::iterator it = m_users->begin();
+	while (it != m_users->end())
+	{
+		if (it->second.getNickname() == tokens[0])
+		{
+			sendMsg(fd, ":irc.araio.com 433 * nickname :Nickname is already in use.\r\n");
+			return;
+		}
+		++it;
+	}
+
     (*m_users)[fd].setNickname(tokens[0]);
-    std::cout << "amigo isto aqui" << std::endl;
     sendMsg(fd, "Nickname set.\r\n");
 }
 
 void CommandHandler::cmdUser(const std::string &param, int fd)
 {
+    std::vector<std::string> tokens = split(param, ' ');
 	if (!(*m_users)[fd].isCapNegotiationComplete())
     {
         sendMsg(fd, "Finish CAP negotiation first.\r\n");
+		(m_waitlist)[fd] = tokens[0];
         return;
     }
-    std::vector<std::string> tokens = split(param, ' ');
     if (tokens.empty())
     {
         sendMsg(fd, "Usage: USER <username>\r\n");
@@ -141,15 +153,41 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
         return;
     }
     std::string channelName = tokens[0];
+	User &user = (*m_users)[fd];
+	if (user.getNickname().empty())
+	{
+		sendMsg(fd, "You must set a nickname first.\r\n");
+		return;
+	}
+	if (user.getUsername().empty())
+	{
+		sendMsg(fd, "You must set a username first.\t\n");
+		return;
+	}
     if (channelName.size() < 1 || channelName[0] != '#')
     {
         sendMsg(fd, "Channel name must start with '#'.\r\n");
         return;
     }
     if (m_channels->find(channelName) == m_channels->end())
-        (*m_channels)[channelName] = Channel(channelName);
+    {
+		(*m_channels)[channelName] = Channel(channelName);
+    	(*m_channels)[channelName].addUser(fd, true);
+	}
+	else if ((*m_channels)[channelName].hasUser(fd))
+	{
+		sendMsg(fd, "Already in channel: " + channelName + "\r\n");
+		return;
+	}
+	else if ((*m_channels)[channelName].getInviteOnly() && !(*m_channels)[channelName].isInvited((*m_users)[fd].getNickname()))
+	{
+		sendMsg(fd, "You're not invited to that channel.\r\n");
+		return;
+	}
+	else
+    	(*m_channels)[channelName].addUser(fd, false);
 
-    (*m_channels)[channelName].addUser(fd, false);
+
 	std::cout << "Joining channel" << std::endl;
     sendMsg(fd, "Joined channel " + channelName + "\r\n");
     broadcastChannel(channelName, (*m_users)[fd].getNickname() + " joined " + channelName + "\r\n");
@@ -173,7 +211,11 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
             msg += " ";
         i++;
     }
-    std::string fullMsg = (*m_users)[fd].getNickname() + ": " + msg + "\r\n";
+	std::string fullMsg = "";
+	if ((*m_channels)[target].isOperator(fd) == true)
+    	fullMsg = "[OP]" + (*m_users)[fd].getNickname() + ": " + msg + "\r\n";
+	else
+		fullMsg = (*m_users)[fd].getNickname() + ": " + msg + "\r\n";
     if (target.size() > 0 && target[0] == '#')
     {
         if (m_channels->find(target) == m_channels->end())
@@ -186,6 +228,7 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
             sendMsg(fd, "You're not on that channel.\r\n");
             return;
         }
+		std::cout << "PRIV MSG: "<< fullMsg.c_str() << std::endl;
         broadcastChannel(target, fullMsg);
     }
     else
@@ -215,8 +258,30 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         sendMsg(fd, "Usage: KICK <#channel> <nick>\r\n");
         return;
     }
-    std::string channelName = tokens[0];
-    std::string nick = tokens[1];
+    std::string channelName;
+    std::string nick;
+	std::string message;
+	for (size_t i = 0; i < tokens.size(); i++)
+    {
+        if (tokens[i][0] == '#')
+        {
+            channelName = tokens[i];
+        }
+        else if (tokens[i][0] == ':')
+        {
+            if (nick.empty())
+            {
+                nick = tokens[i].substr(1); // Remover o ":"
+            }
+        }
+    }
+	size_t pos = param.find(":");
+	if (pos != std::string::npos)
+	{
+		pos = param.find(":", pos + 1);
+		if (pos != std::string::npos)
+			message = param.substr(pos + 1);
+	}
     if (m_channels->find(channelName) == m_channels->end())
     {
         sendMsg(fd, "Channel doesn't exist.\r\n");
@@ -244,8 +309,10 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         sendMsg(fd, "User not found in channel.\r\n");
         return;
     }
+	if (ch.getInviteOnly())
+		ch.removeInvitedUser((*m_users)[victimFd].getNickname());
     ch.removeUser(victimFd);
-    sendMsg(victimFd, "You were KICKed from " + channelName + "\r\n");
+    sendMsg(victimFd, "You were KICKED from " + channelName + ":" + message + "\r\n");
     broadcastChannel(channelName, nick + " was kicked from channel.\r\n");
 }
 
@@ -288,6 +355,7 @@ void CommandHandler::cmdInvite(const std::string &param, int fd)
     }
     sendMsg(invitedFd, "You've been invited to " + channelName + "\r\n");
     broadcastChannel(channelName, nick + " was invited to the channel.\r\n");
+	ch.addInvtedUser(invitedFd, nick);
 }
 
 void CommandHandler::cmdTopic(const std::string &param, int fd)
@@ -342,7 +410,9 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
         return;
     }
     std::string channelName = tokens[0];
+	std::cout << "Channel name: " << channelName << std::endl;
     std::string modes       = tokens[1];
+	std::cout << "Modes: " << modes << std::endl;
     if (m_channels->find(channelName) == m_channels->end())
     {
         sendMsg(fd, "Channel doesn't exist.\r\n");
@@ -432,7 +502,10 @@ void CommandHandler::cmdCap(const std::string &param, int fd)
     else if (subcommand == "END")
 	{
 		(*m_users)[fd].setCapNegotiationComplete(true);
+		(*m_users)[fd].setUsername((m_waitlist)[fd]);
+		(m_waitlist).erase(fd);
 		sendMsg(fd, "CAP END\r\n");
+		sendMsg(fd, "Username set.\r\n");
 	}
     else
     {
@@ -442,7 +515,7 @@ void CommandHandler::cmdCap(const std::string &param, int fd)
 
 void CommandHandler::sendMsg(int fd, const std::string &msg)
 {
-    std::cout << "Sending to " << fd << ": " << msg;
+    std::cout << "---> Sending to " << fd << ": " << msg;
     ::send(fd, msg.c_str(), msg.size(), 0);
 }
 
@@ -458,4 +531,29 @@ void CommandHandler::broadcastChannel(const std::string &channelName, const std:
         ::send(it->first, msg.c_str(), msg.size(), 0);
         ++it;
     }
+}
+
+void CommandHandler::cmdQuit(const std::string &param, int fd) {
+	std::vector<std::string> tokens = split(param, ' ');
+	if (tokens.size() < 1) {
+		sendMsg(fd, "Usage: QUIT [message]\r\n");
+		return;
+	}
+	std::string msg;
+	for (std::vector<std::string>::size_type i = 0; i < tokens.size(); i++) {
+		msg += tokens[i];
+		if (i + 1 < tokens.size())
+			msg += " ";
+	}
+	std::map<std::string, Channel>::iterator it = m_channels->begin();
+	while (it != m_channels->end()) {
+		if (it->second.hasUser(fd)) {
+			it->second.removeUser(fd);
+			broadcastChannel(it->first, (*m_users)[fd].getNickname() + " left the channel.\r\n");
+		}
+		++it;
+	}
+	sendMsg(fd, "Goodbye!\r\n");
+	close(fd);
+	m_users->erase(fd);
 }

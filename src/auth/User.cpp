@@ -1,7 +1,7 @@
 #include "../../include/auth/User.hpp"
 
 User::User() {}
-User::User(int &socket): _socketFd(socket), _authenticated(false), _isOperator(false){}
+User::User(int &socket): _socketFd(socket), _authenticated(false), _isOperator(false), _capNegotiationComplete(false) {}
 User::~User() {}
 
 void User::setNickname(const std::string &nick)

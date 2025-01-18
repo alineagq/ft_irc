@@ -14,8 +14,8 @@ private:
     bool _topicLocked;
     std::string _key;
     int _userLimit;
-    std::map<int,bool> _users;
-
+    std::map<int, bool> _users;
+	std::map<int, std::string> _invitedUsers;
 public:
     Channel();
     Channel(const std::string &name);
@@ -46,6 +46,9 @@ public:
     int getUserLimit() const;
 
     const std::map<int,bool> &getUserMap() const;
+	void addInvtedUser(int fd, std::string nick);
+	bool isInvited(std::string nick);
+	void removeInvitedUser(std::string nick);
 };
 
 #endif

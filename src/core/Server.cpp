@@ -48,7 +48,7 @@ Server::Server(Logger& logger, int port, std::string pw):
         exit(EXIT_FAILURE);
     }
     std::ostringstream oss;
-    oss << "Server listening on port " << port << std::endl;
+    oss << "---> Server listening on port " << port << std::endl;
     logger.info(oss.str());
 
     _commandHandler.init(&_users, &_channels, _password);
@@ -81,7 +81,6 @@ bool Server::run() {
 	}
 
 	int serverFd = _serverSocket.getFd();
-	std::cout << "running: " << _isRunning << std::endl;
 	while (_isRunning == false) {
             sockaddr_in clientAddr;
             // wait for events on the epoll
@@ -133,10 +132,8 @@ bool Server::configureClient(int clientSocket) {
 
     User newUser(clientSocket);
     addUser(newUser);
-    std::cout << "Client successfully added to epoll" << std::endl;
-    std::cout << "Received Client socket: " << clientSocket << std::endl;
-    std::cout << "Server Client socket: " << newUser.getSocket() << std::endl;
-
+    std::cout << "---> Server Client socket: " << newUser.getSocket() << std::endl;
+	
     return true;
 }
 
@@ -172,15 +169,13 @@ void Server::handleClientData(int clientFd)
     std::string &bufferRef = _users[clientFd].getBufferRef();
 	// inserir \\r\\n com "nc"
     std::string::size_type pos = bufferRef.find("\r\n");
-    std::cout << "buff ref: " << bufferRef << std::endl;
-    std::cout << "pos: " << pos << std::endl;
     while (pos != std::string::npos)
     {
         std::string line = bufferRef.substr(0, pos);
         bufferRef.erase(0, pos + 2);
-        std::cout << "Client command: " << line << std::endl;
-        _commandHandler.processCommand(line, clientFd);
+        std::cout << "<--- Client command: " << line << std::endl;
         pos = bufferRef.find("\r\n");
+        _commandHandler.processCommand(line, clientFd);
     }
 }
 

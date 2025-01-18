@@ -12,6 +12,7 @@ private:
     std::map<int, User> *m_users;
     std::map<std::string, Channel> *m_channels;
     std::string m_serverPassword;
+	std::map<int, std::string> m_waitlist;
 
 public:
     CommandHandler();
@@ -34,6 +35,7 @@ private:
     void cmdTopic(const std::string &param, int fd);
     void cmdMode(const std::string &param, int fd);
 	void cmdCap(const std::string &param, int fd);
+	void cmdQuit(const std::string &param, int fd);
 
     void sendMsg(int fd, const std::string &msg);
     void broadcastChannel(const std::string &channelName, const std::string &msg);
