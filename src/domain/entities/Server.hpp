@@ -46,11 +46,12 @@ class Server: public IServer {
         int _port;
 		std::string _password;
         static bool _isRunning;
-        Socket _serverSocket;
         std::map<int, User> _users;
         std::map<std::string, Channel> _channels;
         CommandHandler _commandHandler;
+        Socket _serverSocket;
 
         Server();
+        Server(Server &other);
         Server &operator=(Server &other);
 };

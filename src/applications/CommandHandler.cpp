@@ -153,7 +153,7 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
         sendMsg(fd, "Usage: JOIN <#channel>\r\n");
         return;
     }
-    std::string channelName = tokens[0];
+    const std::string channelName = tokens[0];
 	std::string userNick = (*m_users)[fd].getNickname();
 	std::string username = (*m_users)[fd].getUsername();
 
