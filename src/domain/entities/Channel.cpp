@@ -1,14 +1,41 @@
 #include "Channel.hpp"
 
-Channel::Channel()
-: _inviteOnly(false), _topicLocked(false), _userLimit(-1)
+Channel::Channel() : _name(""), _inviteOnly(false), _topicLocked(false), _userLimit(-1)
 {
+    _topic = "Welcome! :)";
 }
 
 Channel::Channel(const std::string &name)
 : _name(name), _inviteOnly(false), _topicLocked(false), _userLimit(-1)
 {
 	_topic = "Welcome! :)";
+}
+
+Channel::Channel(const Channel &ch)
+{
+    _name = ch._name;
+    _topic = ch._topic;
+    _inviteOnly = ch._inviteOnly;
+    _topicLocked = ch._topicLocked;
+    _key = ch._key;
+    _userLimit = ch._userLimit;
+    _users = ch._users;
+    _invitedUsers = ch._invitedUsers;
+}
+
+Channel &Channel::operator=(const Channel &ch)
+{
+    if (this == &ch)
+        return *this;
+    _name = ch._name;
+    _topic = ch._topic;
+    _inviteOnly = ch._inviteOnly;
+    _topicLocked = ch._topicLocked;
+    _key = ch._key;
+    _userLimit = ch._userLimit;
+    _users = ch._users;
+    _invitedUsers = ch._invitedUsers;
+    return *this;
 }
 
 Channel::~Channel()
@@ -25,22 +52,22 @@ const std::string &Channel::getName() const
     return _name;
 }
 
-void Channel::addUser(std::string nick, bool isOp) //change
+void Channel::addUser(std::string nick, bool isOp)
 {
     _users[nick] = isOp;
 }
 
-void Channel::removeUser(std::string nick) //change
+void Channel::removeUser(std::string nick)
 {
     _users.erase(nick);
 }
 
-bool Channel::hasUser(std::string nick) const //change
+bool Channel::hasUser(std::string nick) const
 {
     return (_users.find(nick) != _users.end());
 }
 
-bool Channel::isOperator(std::string nick) const //change
+bool Channel::isOperator(std::string nick) const
 {
     std::map<std::string,bool>::const_iterator it = _users.find(nick);
     if (it != _users.end())
@@ -48,7 +75,7 @@ bool Channel::isOperator(std::string nick) const //change
     return false;
 }
 
-void Channel::setOperator(std::string nick, bool op) //change
+void Channel::setOperator(std::string nick, bool op)
 {
     std::map<std::string, bool>::iterator it = _users.find(nick);
     if (it != _users.end())
@@ -89,7 +116,6 @@ bool Channel::getTopicLocked() const
 
 void Channel::setKey(const std::string &key)
 {
-	std::cout << "KEY: " << key << std::endl;
     _key = key;
 }
 
