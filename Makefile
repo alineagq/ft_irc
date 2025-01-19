@@ -7,6 +7,14 @@ RM          = rm -rf
 OBDIR       = .obj
 
 SRC         = 	src/applications/CommandHandler.cpp\
+				src/applications/cmdPass.cpp \
+				src/applications/cmdNick.cpp \
+				src/applications/cmdUser.cpp \
+				src/applications/cmdJoin.cpp \
+				src/applications/cmdPrivMsg.cpp \
+				src/applications/cmdKick.cpp \
+				src/applications/cmdInvite.cpp \
+				src/applications/cmdCap.cpp \
 				src/domain/entities/Channel.cpp \
 				src/domain/entities/Server.cpp \
 				src/domain/entities/User.cpp \
@@ -18,7 +26,7 @@ SRC         = 	src/applications/CommandHandler.cpp\
 
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBDIR)/%.o, $(SRC))
 
-INCLUDE_DIR = src/network
+INCLUDE_DIR = src/nework
 SRC_DIR     = src
 TESTS_DIR   = tests
 

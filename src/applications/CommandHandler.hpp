@@ -3,8 +3,16 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <cstdlib>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <iostream>
+#include <sstream>
+#include <cctype>
+#include <vector>
 #include "../domain/entities/User.hpp"
 #include "../domain/entities/Channel.hpp"
+#include "../entrypoint/utils/utils.hpp"
 
 class CommandHandler
 {
