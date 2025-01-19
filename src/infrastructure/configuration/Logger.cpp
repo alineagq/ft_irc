@@ -1,18 +1,10 @@
 #include "Logger.hpp"
-#include <ctime>
-#include <sstream>
-#include <iomanip>
-#include <cstdlib>
-
-#define DEBUG 1
 
 Logger::Logger(const std::string& outputFile, const std::string& errorFile)
     : outputLogFile(outputFile.c_str(), std::ios::app),
       errorLogFile(errorFile.c_str(), std::ios::app) {
-    if (!outputLogFile.is_open() || !errorLogFile.is_open()) {
-        std::cerr << "Unable to open log files!" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    if (!outputLogFile.is_open() || !errorLogFile.is_open()) 
+        throw LoggerException("Unable to open log files!");
 }
 
 Logger::~Logger() {
@@ -38,22 +30,30 @@ std::string Logger::getCurrentTime() const {
 }
 
 void Logger::info(const std::string& message) {
-    outputLogFile << message;
-    if (DEBUG) std::cout << message;
+    std::ostringstream oss;
+    oss << getCurrentTime() << " [INFO] " << message << std::endl;
+    outputLogFile << oss.str();
+    if (DEBUG) std::cout << oss.str();
 }
 
 void Logger::warning(const std::string& message) {
-    outputLogFile << message;
-    if (DEBUG) std::cout << message;
+    std::ostringstream oss;
+    oss << getCurrentTime() << " [WARNING] " << message << std::endl;
+    outputLogFile << oss.str();
+    if (DEBUG) std::cout << oss.str();
 }
 
 void Logger::error(const std::string& message) {
-    errorLogFile << message;
-    if (DEBUG) std::cerr << message;
+    std::ostringstream oss;
+    oss << getCurrentTime() << " [ERROR] " << message << std::endl;
+    errorLogFile << oss.str();
+    if (DEBUG) std::cerr << oss.str();
 }
 
 void Logger::fatal(const std::string& message) {
-    errorLogFile << message;
-    if (DEBUG) std::cerr << message;
-    exit(EXIT_FAILURE);
+    std::ostringstream oss;
+    oss << getCurrentTime() << " [FATAL] " << message << std::endl;
+    errorLogFile << oss.str();
+    if (DEBUG) std::cerr << oss.str();
+    throw LoggerException(oss.str());
 }

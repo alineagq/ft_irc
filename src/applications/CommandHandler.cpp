@@ -33,9 +33,7 @@ void CommandHandler::processCommand(const std::string &line, int fd)
     }
     for (std::string::size_type i = 0; i < command.size(); i++)
         command[i] = static_cast<char>(std::toupper(command[i]));
-
-    // fazer mapeamento de funções
-	// implementar CAP LS
+  
 	std::cout << "Command: " << command << std::endl;
 	if (command == "CAP")
 		cmdCap(param, fd);

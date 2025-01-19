@@ -8,6 +8,8 @@ class User {
     public:
         User();
         User(int &socket, std::string clientIP);
+        User(const User &other);
+        User &operator=(const User &other);
         ~User();
 
         void setNickname(const std::string &nick);
@@ -31,7 +33,6 @@ class User {
 		bool isCapNegotiationComplete() const;
 
     private:
-        // char host[NI_MAXHOST];
 		std::string _clientIP;
         int _socketFd;
         std::string _username;
@@ -40,4 +41,5 @@ class User {
         bool _isOperator;
         std::string _buffer;
 		bool _capNegotiationComplete;
+
 };

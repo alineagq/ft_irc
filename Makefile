@@ -25,6 +25,7 @@ SRC         = 	src/applications/CommandHandler.cpp\
 				src/entrypoint/utils/utils.cpp \
 				src/entrypoint/start_server.cpp \
 				src/infrastructure/configuration/Logger.cpp \
+				src/infrastructure/exceptions/LoggerException.cpp \
 				src/infrastructure/network/Socket.cpp \
 
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBDIR)/%.o, $(SRC))

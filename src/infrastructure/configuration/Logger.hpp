@@ -1,13 +1,18 @@
-#ifndef LOGGER_HPP
-#define LOGGER_HPP
+#pragma once
 
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <ctime>
+#include <sstream>
+#include <iomanip>
+#include <cstdlib>
+#include "../exceptions/LoggerException.hpp"
+
+#define DEBUG 1
 
 class Logger {
 public:
-
     explicit Logger(const std::string& outputFile, const std::string& errorFile);
     ~Logger();
 
@@ -20,8 +25,8 @@ private:
     std::ofstream outputLogFile;
     std::ofstream errorLogFile;
 
+    Logger();
+    Logger(const Logger&);
+    Logger& operator=(const Logger&);
     std::string getCurrentTime() const;
-
 };
-
-#endif

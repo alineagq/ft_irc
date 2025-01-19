@@ -19,4 +19,7 @@ public:
 
 private:
     int sock;
+
+    Socket(const Socket&);
+    Socket& operator=(const Socket&);
 };
