@@ -10,9 +10,7 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
         return;
     }
     std::string channelName = tokens[0];
-	std::cout << "Channel name: " << channelName << std::endl;
     std::string modes       = tokens[1];
-	std::cout << "Modes: " << modes << std::endl;
     if (m_channels->find(channelName) == m_channels->end())
     {
         sendMsg(fd, "Channel doesn't exist.\r\n");
@@ -69,7 +67,6 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
             else if (tokens.size() > 2)
             {
                 int limit = add ? std::atoi(tokens[2].c_str()) : -1;
-				std::cout << "Limit: " << limit << std::endl;
                 ch.setUserLimit(limit);
             }
         }

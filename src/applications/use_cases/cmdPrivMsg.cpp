@@ -36,7 +36,6 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
             sendMsg(fd, "You're not on that channel.\r\n");
             return;
         }
-		std::cout << "PRIV MSG: "<< fullMsg.c_str() << std::endl;
         broadcastChannel(target, fullMsg);
     }
     else
