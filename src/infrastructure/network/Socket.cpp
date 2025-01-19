@@ -5,9 +5,8 @@
 Socket::Socket() : sock(-1) {}
 
 Socket::~Socket() {
-    if (sock != -1) {
+    if (sock != -1)
         close();
-    }
 }
 
 bool Socket::create() {
@@ -29,9 +28,8 @@ bool Socket::listen(int backlog) {
 
 int Socket::setSocketLinger() {
     struct linger lingerOpt;
-    lingerOpt.l_onoff = 1;  // Ativar SO_LINGER
-    lingerOpt.l_linger = 0; // Fechar imediatamente
-    
+    lingerOpt.l_onoff = 1;
+    lingerOpt.l_linger = 0;
     return ::setsockopt(sock, SOL_SOCKET, SO_LINGER, &lingerOpt, sizeof(lingerOpt));
 }
 
