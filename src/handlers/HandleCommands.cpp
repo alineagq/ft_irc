@@ -206,7 +206,8 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
 
 
 	std::cout << "Joining channel" << std::endl;
-    sendMsg(fd, "Joined channel " + channelName + "\r\n");
+	std::string topic = "Channel Topic: " + (*m_channels)[channelName].getTopic();
+    sendMsg(fd, "Joined channel " + channelName + "\n" + topic + "\r\n");
     broadcastChannel(channelName, userNick + " joined " + channelName + "\r\n");
 }
 
@@ -417,7 +418,7 @@ void CommandHandler::cmdTopic(const std::string &param, int fd)
                 t += " ";
             t += tokens[i];
         }
-        ch.setTopic(t);
+        ch.setTopic(t.substr(1));
         broadcastChannel(channelName, "Channel topic changed to: " + t + "\r\n");
     }
 }

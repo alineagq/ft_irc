@@ -8,6 +8,7 @@ Channel::Channel()
 Channel::Channel(const std::string &name)
 : _name(name), _inviteOnly(false), _topicLocked(false), _userLimit(-1)
 {
+	_topic = "Welcome! :)";
 }
 
 Channel::~Channel()
