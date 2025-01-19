@@ -7,7 +7,7 @@
 class User {
     public:
         User();
-        User(int &socket);
+        User(int &socket, std::string clientIP);
         ~User();
 
         void setNickname(const std::string &nick);
@@ -32,6 +32,7 @@ class User {
 
     private:
         // char host[NI_MAXHOST];
+		std::string _clientIP;
         int _socketFd;
         std::string _username;
         std::string _nickname;

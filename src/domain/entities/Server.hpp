@@ -25,7 +25,7 @@ class Server: public IServer {
         ~Server();
 		
 		bool run();
-		bool configureClient(int clientSocket);
+		bool configureClient();
 		bool configurePoll(struct epoll_event &ev);
         void handleClientData(int clientFd);
         
@@ -39,6 +39,7 @@ class Server: public IServer {
 		void setSignals();
 		static void signalHandler(int signum);
 
+		std::string getClientIP(sockaddr_in &clientAddr) const;
         void closeFds();
 
     private:

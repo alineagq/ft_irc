@@ -66,7 +66,6 @@ bool Server::run() {
 
 	int serverFd = _serverSocket.getFd();
 	while (_isRunning == false) {
-            sockaddr_in clientAddr;
             // wait for events on the epoll
             int numEvents = epoll_wait(_epollFd, events, 512, -1);
             if (numEvents == -1) {
@@ -77,12 +76,7 @@ bool Server::run() {
             for (int i = 0; i < numEvents; i++) {
                 if (events[i].data.fd == serverFd)
                 {
-                    int clientSocket = _serverSocket.accept(clientAddr);
-                    if (clientSocket == -1) {
-                        // logger.error("Failed to accept client connection: " + std::string(strerror(errno)));
-                        continue;
-                    }
-                    if (!configureClient(clientSocket)) {
+                    if (!configureClient()) {
                         // logger.error("Failed to configure client");
                         continue;
                     }
@@ -97,13 +91,18 @@ bool Server::run() {
 	return true;
 }
 
-bool Server::configureClient(int clientSocket) {
+bool Server::configureClient() {
+	sockaddr_in clientAddr;
+	int clientSocket = _serverSocket.accept(clientAddr);
+
+	if (clientSocket == -1) {
+		// logger.error("Failed to accept client connection: " + std::string(strerror(errno)));
+	}
 	if (fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1) {
         std::cerr << "Failed to set non-blocking mode for clientSocket" << std::endl;
         ::close(clientSocket);
         return false;
     }
-
     struct epoll_event clientEvent;
     memset(&clientEvent, 0, sizeof(clientEvent));
     clientEvent.events = EPOLLIN;
@@ -114,7 +113,9 @@ bool Server::configureClient(int clientSocket) {
         return false;
     }
 
-    User newUser(clientSocket);
+	std::string clientIP = getClientIP(clientAddr);
+    User newUser(clientSocket, clientIP);
+	std::cout << "---> Server Client IP: " << clientIP << std::endl;
     addUser(newUser);
     std::cout << "---> Server Client socket: " << newUser.getSocket() << std::endl;
 	
@@ -145,20 +146,23 @@ void Server::handleClientData(int clientFd)
     std::memset(buf, 0, sizeof(buf));
 
     int recvBytes = recv(clientFd, buf, 511, 0);
+	std::cout << "BUFF: "<< buf << std::endl;
     if (recvBytes <= 0)
     {
+		close(clientFd);
+		_users.erase(clientFd);
         return;
     }
     _users[clientFd].appendBuffer(std::string(buf));
     std::string &bufferRef = _users[clientFd].getBufferRef();
 	// inserir \\r\\n com "nc"
-    std::string::size_type pos = bufferRef.find("\r\n");
+    std::string::size_type pos = bufferRef.find("\n");
     while (pos != std::string::npos)
     {
         std::string line = bufferRef.substr(0, pos);
         bufferRef.erase(0, pos + 2);
         std::cout << "<--- Client command: " << line << std::endl;
-        pos = bufferRef.find("\r\n");
+        pos = bufferRef.find("\n");
         _commandHandler.processCommand(line, clientFd);
     }
 }
@@ -193,6 +197,12 @@ void Server::signalHandler(int signum)
 	(void)signum;
 	std::cout << std::endl << "Signal Received!" << std::endl;
 	_isRunning = true;
+}
+
+std::string Server::getClientIP(sockaddr_in &clientAddr) const {
+    char clientIP[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &clientAddr.sin_addr, clientIP, INET_ADDRSTRLEN);
+    return std::string(clientIP);
 }
 
 void Server::closeFds() {
