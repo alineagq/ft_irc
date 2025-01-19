@@ -1,4 +1,4 @@
-#include "CommandHandler.hpp"
+#include "../CommandHandler.hpp"
 
 void CommandHandler::cmdKick(const std::string &param, int fd)
 {

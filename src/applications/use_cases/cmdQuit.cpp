@@ -1,4 +1,4 @@
-#include "CommandHandler.hpp"
+#include "../CommandHandler.hpp"
 
 void CommandHandler::cmdQuit(const std::string &param, int fd) {
 	std::vector<std::string> tokens = split(param, ' ');
