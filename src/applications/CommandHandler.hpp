@@ -13,6 +13,7 @@
 #include "../domain/entities/User.hpp"
 #include "../domain/entities/Channel.hpp"
 #include "../entrypoint/utils/utils.hpp"
+#include "../infrastructure/configuration/Logger.hpp"
 
 class CommandHandler
 {

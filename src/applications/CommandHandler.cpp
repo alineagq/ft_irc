@@ -1,5 +1,7 @@
 #include "CommandHandler.hpp"
 
+extern Logger logger;
+
 CommandHandler::CommandHandler()
 : m_users(0), m_channels(0)
 {
@@ -35,8 +37,8 @@ void CommandHandler::processCommand(const std::string &line, int fd)
     {
 		command[i] = static_cast<char>(std::toupper(command[i]));
 	}
-  
-	std::cout << "Command: " << command << std::endl;
+    std::string commandMsg = "Command: " + command;
+    logger.info(commandMsg);
 	if (command == "CAP")
 		cmdCap(param, fd);
     else if (command == "PASS")
@@ -65,7 +67,9 @@ void CommandHandler::processCommand(const std::string &line, int fd)
 
 void CommandHandler::sendMsg(int fd, const std::string &msg)
 {
-    std::cout << "---> Sending to " << fd << ": " << msg;
+    std::ostringstream oss;
+    oss << "Sending to " << fd << ": " << msg;
+    logger.info(oss.str());
     ::send(fd, msg.c_str(), msg.size(), 0);
 }
 
