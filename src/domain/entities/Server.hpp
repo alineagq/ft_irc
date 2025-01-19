@@ -52,5 +52,6 @@ class Server: public IServer {
         Socket _serverSocket;
 
         Server();
+        Server(Server &other);
         Server &operator=(Server &other);
 };
