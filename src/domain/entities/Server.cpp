@@ -26,7 +26,7 @@ Server::Server(Logger& logger, int port, std::string pw):
     }
 
     std::ostringstream oss;
-    oss << "---> Server listening on port " << port << std::endl;
+    oss << "---> Server listening on port " << port;
     logger.info(oss.str());
 
     _commandHandler.init(&_users, &_channels, _password);
@@ -131,7 +131,9 @@ void Server::handleClientData(int clientFd)
     {
         std::string line = bufferRef.substr(0, pos);
         bufferRef.erase(0, pos + 2);
-        std::cout << "<--- Client command: " << line << std::endl;
+        std::ostringstream oss;
+        oss << "Message from client " << clientFd << ": " << line;
+        logger.info(oss.str());
         pos = bufferRef.find("\n");
 		if (bufferRef.find("\r") != std::string::npos)
     		pos = bufferRef.find("\r\n");
