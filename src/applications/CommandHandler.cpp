@@ -32,7 +32,9 @@ void CommandHandler::processCommand(const std::string &line, int fd)
             param = line.substr(pos + 1);
     }
     for (std::string::size_type i = 0; i < command.size(); i++)
-        command[i] = static_cast<char>(std::toupper(command[i]));
+    {
+		command[i] = static_cast<char>(std::toupper(command[i]));
+	}
   
 	std::cout << "Command: " << command << std::endl;
 	if (command == "CAP")
@@ -43,7 +45,7 @@ void CommandHandler::processCommand(const std::string &line, int fd)
         cmdNick(param, fd);
     else if (command == "USER")
         cmdUser(param, fd);
-    else if (command == "JOIN") // leak
+    else if (command == "JOIN")
         cmdJoin(param, fd);
     else if (command == "PRIVMSG")
         cmdPrivMsg(param, fd);
