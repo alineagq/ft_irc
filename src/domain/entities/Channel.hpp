@@ -2,7 +2,6 @@
 
 #include <string>
 #include <map>
-#include "../interfaces/IUser.hpp"
 
 class Channel
 {

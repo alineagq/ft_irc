@@ -39,7 +39,8 @@ void CommandHandler::cmdTopic(const std::string &param, int fd)
                 t += " ";
             t += tokens[i];
         }
-        ch.setTopic(t.substr(1));
-        broadcastChannel(channelName, "Channel topic changed to: " + t + "\r\n");
+        std::string topic = t.substr(1);
+        ch.setTopic(topic);
+        broadcastChannel(channelName, "Channel topic changed to: " + topic + "\r\n");
     }
 }

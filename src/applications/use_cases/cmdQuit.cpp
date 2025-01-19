@@ -17,7 +17,10 @@ void CommandHandler::cmdQuit(const std::string &param, int fd) {
 	while (it != m_channels->end()) {
 		if (it->second.hasUser(userNick)) {
 			it->second.removeUser(userNick);
-			broadcastChannel(it->first, (*m_users)[fd].getNickname() + " left the channel.\r\n");
+			if (!msg.empty())
+				broadcastChannel(it->first, (*m_users)[fd].getNickname() + " left the channel: " + msg.substr(1) + "\r\n");
+			else
+				broadcastChannel(it->first, (*m_users)[fd].getNickname() + " left the channel.\r\n");
 		}
 		++it;
 	}

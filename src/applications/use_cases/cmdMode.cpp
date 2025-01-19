@@ -2,7 +2,6 @@
 
 void CommandHandler::cmdMode(const std::string &param, int fd)
 {
-	// adicioinar logica de setar um operador caso o ultimo operador saia do canal
     std::vector<std::string> tokens = split(param, ' ');
     if (tokens.size() < 2)
     {

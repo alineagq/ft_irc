@@ -5,11 +5,20 @@ extern Logger logger;
 CommandHandler::CommandHandler()
 : m_users(0), m_channels(0)
 {
+    m_commandMap["CAP"]    = &CommandHandler::cmdCap;
+    m_commandMap["PASS"]   = &CommandHandler::cmdPass;
+    m_commandMap["NICK"]   = &CommandHandler::cmdNick;
+    m_commandMap["USER"]   = &CommandHandler::cmdUser;
+    m_commandMap["JOIN"]   = &CommandHandler::cmdJoin;
+    m_commandMap["PRIVMSG"] = &CommandHandler::cmdPrivMsg;
+    m_commandMap["KICK"]   = &CommandHandler::cmdKick;
+    m_commandMap["INVITE"] = &CommandHandler::cmdInvite;
+    m_commandMap["TOPIC"]  = &CommandHandler::cmdTopic;
+    m_commandMap["MODE"]   = &CommandHandler::cmdMode;
+    m_commandMap["QUIT"]   = &CommandHandler::cmdQuit;
 }
 
-CommandHandler::~CommandHandler()
-{
-}
+CommandHandler::~CommandHandler() {}
 
 void CommandHandler::init(std::map<int, User> *users,
                           std::map<std::string, Channel> *channels,
@@ -25,6 +34,7 @@ void CommandHandler::processCommand(const std::string &line, int fd)
     std::vector<std::string> tokens = split(line, ' ');
     if (tokens.empty())
         return;
+
     std::string command = tokens[0];
     std::string param;
     if (tokens.size() > 1)
@@ -33,34 +43,15 @@ void CommandHandler::processCommand(const std::string &line, int fd)
         if (pos != std::string::npos)
             param = line.substr(pos + 1);
     }
+
     for (std::string::size_type i = 0; i < command.size(); i++)
-    {
-		command[i] = static_cast<char>(std::toupper(command[i]));
-	}
-    std::string commandMsg = "Command: " + command;
-    logger.info(commandMsg);
-	if (command == "CAP")
-		cmdCap(param, fd);
-    else if (command == "PASS")
-        cmdPass(param, fd);
-    else if (command == "NICK")
-        cmdNick(param, fd);
-    else if (command == "USER")
-        cmdUser(param, fd);
-    else if (command == "JOIN")
-        cmdJoin(param, fd);
-    else if (command == "PRIVMSG")
-        cmdPrivMsg(param, fd);
-    else if (command == "KICK")
-        cmdKick(param, fd);
-    else if (command == "INVITE")
-        cmdInvite(param, fd);
-    else if (command == "TOPIC")
-        cmdTopic(param, fd);
-    else if (command == "MODE")
-        cmdMode(param, fd);
-	else if (command == "QUIT")
-		cmdQuit(param, fd);
+        command[i] = static_cast<char>(std::toupper(command[i]));
+
+    logger.info("Command: " + command);
+
+    std::map<std::string, CommandFunc>::iterator it = m_commandMap.find(command);
+    if (it != m_commandMap.end())
+        (this->*(it->second))(param, fd);
     else
         sendMsg(fd, "Unknown command.\r\n");
 }
@@ -77,16 +68,14 @@ void CommandHandler::broadcastChannel(const std::string &channelName, const std:
 {
     if (m_channels->find(channelName) == m_channels->end())
         return;
+
     Channel &ch = (*m_channels)[channelName];
     const std::map<std::string,bool> &channelUserMap = ch.getUserMap();
-	const std::map<int, User> &serverUserMap = *m_users;
-    std::map<int, User>::const_iterator it = serverUserMap.begin();
-    while (it != serverUserMap.end())
+    const std::map<int, User> &serverUserMap = *m_users;
+    for (std::map<int, User>::const_iterator it = serverUserMap.begin(); it != serverUserMap.end(); ++it)
     {
-		std::string username =  it->second.getNickname();
-		if (channelUserMap.find(username) != channelUserMap.end())
-        	::send(it->first, msg.c_str(), msg.size(), 0);
-        ++it;
+        std::string username = it->second.getNickname();
+        if (channelUserMap.find(username) != channelUserMap.end())
+            ::send(it->first, msg.c_str(), msg.size(), 0);
     }
 }
-

@@ -21,7 +21,7 @@ void CommandHandler::cmdKick(const std::string &param, int fd)
         {
             if (victimNick.empty())
             {
-                victimNick = tokens[i].substr(1); // Remover o ":"
+                victimNick = tokens[i].substr(1);
             }
         }
     }
