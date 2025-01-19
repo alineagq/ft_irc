@@ -1,15 +1,36 @@
 NAME        = ircserver
 
 CC          = c++
-FLAGS       = -Wall -Wextra -Werror -std=c++98
+FLAGS       = -Wall -Wextra -Werror -std=c++98 -g -O0
 RM          = rm -rf
 
 OBDIR       = .obj
 
-SRC         = $(shell find $(SRC_DIR) -name '*.cpp')
+SRC         = 	src/applications/CommandHandler.cpp\
+				src/applications/use_cases/cmdCap.cpp \
+				src/applications/use_cases/cmdPass.cpp \
+				src/applications/use_cases/cmdNick.cpp \
+				src/applications/use_cases/cmdUser.cpp \
+				src/applications/use_cases/cmdJoin.cpp \
+				src/applications/use_cases/cmdPrivMsg.cpp \
+				src/applications/use_cases/cmdKick.cpp \
+				src/applications/use_cases/cmdInvite.cpp \
+				src/applications/use_cases/cmdTopic.cpp \
+				src/applications/use_cases/cmdMode.cpp \
+				src/applications/use_cases/cmdQuit.cpp \
+				src/domain/entities/Channel.cpp \
+				src/domain/entities/Server.cpp \
+				src/domain/entities/User.cpp \
+				src/domain/exceptions/ServerException.cpp \
+				src/entrypoint/utils/utils.cpp \
+				src/entrypoint/start_server.cpp \
+				src/infrastructure/configuration/Logger.cpp \
+				src/infrastructure/exceptions/LoggerException.cpp \
+				src/infrastructure/network/Socket.cpp \
+
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBDIR)/%.o, $(SRC))
 
-INCLUDE_DIR = include
+INCLUDE_DIR = src/nework
 SRC_DIR     = src
 TESTS_DIR   = tests
 
@@ -35,7 +56,7 @@ clean:
 	@printf "$(YELLOW)    - Object files removed.$(RESET)\n"
 
 fclean: clean
-	@$(RM) $(NAME)
+	@$(RM) $(NAME) server_error.log server.log
 	@printf "$(YELLOW)    - Executable removed.$(RESET)\n"
 
 re: fclean all
