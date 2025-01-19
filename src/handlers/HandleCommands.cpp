@@ -56,6 +56,7 @@ void CommandHandler::processCommand(const std::string &line, int fd)
 
     // fazer mapeamento de funções
 	// implementar CAP LS
+	std::cout << "Command: " << command << std::endl;
 	if (command == "CAP")
 		cmdCap(param, fd);
     else if (command == "PASS")
@@ -186,6 +187,11 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
 		sendMsg(fd, "You're not invited to that channel.\r\n");
 		return;
 	}
+	else if ((*m_channels)[channelName].getUserLimit() != -1 && (int)(*m_channels)[channelName].getUserMap().size() >= (*m_channels)[channelName].getUserLimit())
+	{
+		sendMsg(fd, "Channel is full.\r\n");
+		return;
+	}
 	else
     {
 		if (!(*m_channels)[channelName].getKey().empty())
@@ -232,9 +238,9 @@ void CommandHandler::cmdPrivMsg(const std::string &param, int fd)
 	std::string fullMsg = "";
 	std::string userNick = (*m_users)[fd].getNickname();
 	if ((*m_channels)[target].isOperator(userNick) == true)
-    	fullMsg = "[OP]" + userNick + " <" + target + ">: " + msg + "\r\n";
+    	fullMsg = "[OP]" + userNick + "sends to [" + target + "]: " + msg + "\r\n";
 	else
-		fullMsg = userNick + " <" + target + ">: "+ msg + "\r\n";
+		fullMsg = userNick + "sends to [" + target + "]: "+ msg + "\r\n";
     if (target.size() > 0 && target[0] == '#')
     {
         if (m_channels->find(target) == m_channels->end())
@@ -487,9 +493,12 @@ void CommandHandler::cmdMode(const std::string &param, int fd)
         }
         else if (c == 'l')
         {
-            if (tokens.size() > 2)
+			if (!add)
+				ch.setUserLimit(-1);
+            else if (tokens.size() > 2)
             {
                 int limit = add ? std::atoi(tokens[2].c_str()) : -1;
+				std::cout << "Limit: " << limit << std::endl;
                 ch.setUserLimit(limit);
             }
         }
@@ -528,9 +537,13 @@ void CommandHandler::cmdCap(const std::string &param, int fd)
 	{
 		(*m_users)[fd].setCapNegotiationComplete(true);
 		(*m_users)[fd].setUsername((m_waitlist)[fd]);
-		(m_waitlist).erase(fd);
 		sendMsg(fd, "CAP END\r\n");
-		sendMsg(fd, "Username set.\r\n");
+		if (!(m_waitlist)[fd].empty())
+		{
+			std::cout << "Username: " << (m_waitlist)[fd] << std::endl;
+			(m_waitlist).erase(fd);
+			sendMsg(fd, "Username set.\r\n");
+		}
 	}
     else
     {

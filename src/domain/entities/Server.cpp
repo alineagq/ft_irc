@@ -156,13 +156,17 @@ void Server::handleClientData(int clientFd)
     _users[clientFd].appendBuffer(std::string(buf));
     std::string &bufferRef = _users[clientFd].getBufferRef();
 	// inserir \\r\\n com "nc"
-    std::string::size_type pos = bufferRef.find("\n");
+	std::string::size_type pos = bufferRef.find("\n");
+	if (bufferRef.find("\r") != std::string::npos)
+    	pos = bufferRef.find("\r\n");
     while (pos != std::string::npos)
     {
         std::string line = bufferRef.substr(0, pos);
         bufferRef.erase(0, pos + 2);
         std::cout << "<--- Client command: " << line << std::endl;
         pos = bufferRef.find("\n");
+		if (bufferRef.find("\r") != std::string::npos)
+    		pos = bufferRef.find("\r\n");
         _commandHandler.processCommand(line, clientFd);
     }
 }
