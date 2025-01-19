@@ -1,9 +1,37 @@
 #include "User.hpp"
 
 User::User() {}
+
 User::User(int &socket, std::string clientIP): _socketFd(socket), _authenticated(false), _isOperator(false), _capNegotiationComplete(false) {
 	_clientIP = clientIP;
 }
+
+User::User(const User &other)
+{
+    _socketFd = other._socketFd;
+    _username = other._username;
+    _nickname = other._nickname;
+    _authenticated = other._authenticated;
+    _isOperator = other._isOperator;
+    _buffer = other._buffer;
+    _capNegotiationComplete = other._capNegotiationComplete;
+}
+
+User &User::operator=(const User &other)
+{
+    if (this != &other)
+    {
+        _socketFd = other._socketFd;
+        _username = other._username;
+        _nickname = other._nickname;
+        _authenticated = other._authenticated;
+        _isOperator = other._isOperator;
+        _buffer = other._buffer;
+        _capNegotiationComplete = other._capNegotiationComplete;
+    }
+    return *this;
+}
+
 User::~User() {}
 
 void User::setNickname(const std::string &nick)
