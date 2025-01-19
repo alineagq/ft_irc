@@ -66,7 +66,6 @@ void CommandHandler::cmdJoin(const std::string &param, int fd)
 	}
 
 
-	std::cout << "Joining channel" << std::endl;
 	std::string topic = "Channel Topic: " + (*m_channels)[channelName].getTopic();
     sendMsg(fd, "Joined channel " + channelName + "\n" + topic + "\r\n");
     broadcastChannel(channelName, userNick + " joined " + channelName + "\r\n");
