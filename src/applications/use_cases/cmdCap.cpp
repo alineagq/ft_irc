@@ -33,7 +33,6 @@ void CommandHandler::cmdCap(const std::string &param, int fd)
 		sendMsg(fd, "CAP END\r\n");
 		if (!(m_waitlist)[fd].empty())
 		{
-			std::cout << "Username: " << (m_waitlist)[fd] << std::endl;
 			(m_waitlist).erase(fd);
 			sendMsg(fd, "Username set.\r\n");
 		}
