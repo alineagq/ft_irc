@@ -8,7 +8,6 @@ int main(int argc, char* argv[]) {
 
     validateArgs(argc, argv);
     int port = validatePort(atoi(argv[1]));
-
     try {
         Server server(logger, port, argv[2]);
         server.run();
