@@ -21,3 +21,16 @@ int validatePort(int port) {
     }
     return port;
 }
+
+std::vector<std::string> split(const std::string &str, char delim)
+{
+    std::vector<std::string> tokens;
+    std::istringstream iss(str.c_str());
+    std::string tmp;
+    while (std::getline(iss, tmp, delim))
+    {
+        if (!tmp.empty())
+            tokens.push_back(tmp);
+    }
+    return tokens;
+}
