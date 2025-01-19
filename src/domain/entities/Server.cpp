@@ -2,35 +2,27 @@
 
 Server::Server(Logger& logger, int port, std::string pw):
 							_epollFd(epoll_create1(0)), _port(port), _password(pw) {
-    if (_epollFd == -1) {
+    if (_epollFd == -1)
         throw ServerException("Failed to create epoll file descriptor");
-    }
-
-	//close epollfd
-     if (!_serverSocket.create()) {
+    
+    if (!_serverSocket.create())
         throw ServerException("Failed to create a socket");
-    }
 
-    if (!_serverSocket.bind(port)) {
+    if (!_serverSocket.bind(port))
         throw ServerException("Failed to bind the socket");
-    }
 
-    if (!_serverSocket.listen()) {
+    if (!_serverSocket.listen())
         throw ServerException("Failed to listen on the socket");
-    }
 
-    if (_serverSocket.setSocketLinger() == -1) {
+    if (_serverSocket.setSocketLinger() == -1)
         throw ServerException("Failed to set socket linger");
-    }
 
     int serverSocketFd = _serverSocket.getFd();
-    // setSignals();
-    // Convert the success message to string using ostringstream
-     if (fcntl(serverSocketFd, F_SETFL, O_NONBLOCK) == -1) {
-        std::cerr << "Failed to set non-blocking mode for clientSocket" << std::endl;
+    if (fcntl(serverSocketFd, F_SETFL, O_NONBLOCK) == -1) {
         ::close(serverSocketFd);
-        exit(EXIT_FAILURE);
+        throw ServerException("Failed to set non-blocking mode for server socket");
     }
+
     std::ostringstream oss;
     oss << "---> Server listening on port " << port << std::endl;
     logger.info(oss.str());

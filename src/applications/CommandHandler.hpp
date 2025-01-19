@@ -3,8 +3,8 @@
 #include <map>
 #include <vector>
 #include <string>
-#include "../auth/User.hpp"
-#include "../core/Channel.hpp"
+#include "../domain/entities/User.hpp"
+#include "../domain/entities/Channel.hpp"
 
 class CommandHandler
 {

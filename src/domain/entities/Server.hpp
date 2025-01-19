@@ -10,14 +10,13 @@
 #include <cerrno>
 #include <cstring>
 #include <signal.h>
+#include "User.hpp"
+#include "../entities/Channel.hpp"
+#include "../interfaces/IServer.hpp"
 #include "../exceptions/ServerException.hpp"
-#include "../../../include/network/Socket.hpp"
-#include "../../include/auth/User.hpp"
-#include "../infrastructure/configuration/Logger.hpp"
-#include "../../include/network/Socket.hpp"
-#include "../domain/interfaces/IServer.hpp"
-#include "../../include/handlers/HandleCommands.hpp"
-#include "../../include/core/Channel.hpp"
+#include "../../applications/CommandHandler.hpp" 
+#include "../../infrastructure/configuration/Logger.hpp"
+#include "../../infrastructure/network/Socket.hpp"
 
 class Server: public IServer {
     public:

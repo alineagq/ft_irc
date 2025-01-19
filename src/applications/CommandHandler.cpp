@@ -1,4 +1,4 @@
-#include "../../include/handlers/HandleCommands.hpp"
+#include "CommandHandler.hpp"
 #include <cstdlib>
 #include <sys/socket.h>
 #include <unistd.h>

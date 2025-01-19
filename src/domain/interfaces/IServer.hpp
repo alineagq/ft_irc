@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../include//auth/User.hpp"
+#include "../entities/User.hpp"
 #include <map>
 
 class IServer {

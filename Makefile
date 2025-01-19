@@ -6,11 +6,15 @@ RM          = rm -rf
 
 OBDIR       = .obj
 
-SRC         = src/network/Socket.cpp src/network/TcpConnection.cpp \
-			src/infrastructure/configuration/Logger.cpp  src/auth/User.cpp src/domain/entities/Server.cpp \
-			src/entrypoint/start_server.cpp src/handlers/HandleCommands.cpp\
-			src/core/Channel.cpp src/entrypoint/utils/utils.cpp \
-			src/domain/exceptions/ServerException.cpp \
+SRC         = 	src/applications/CommandHandler.cpp\
+				src/domain/entities/Channel.cpp \
+				src/domain/entities/Server.cpp \
+				src/domain/entities/User.cpp \
+				src/domain/exceptions/ServerException.cpp \
+				src/entrypoint/utils/utils.cpp \
+				src/entrypoint/start_server.cpp \
+				src/infrastructure/configuration/Logger.cpp \
+				src/infrastructure/network/Socket.cpp \
 
 OBJ         = $(patsubst $(SRC_DIR)/%.cpp, $(OBDIR)/%.o, $(SRC))
 
