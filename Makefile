@@ -7,6 +7,7 @@ RM          = rm -rf
 OBDIR       = .obj
 
 SRC         = 	src/applications/CommandHandler.cpp\
+				src/applications/cmdCap.cpp \
 				src/applications/cmdPass.cpp \
 				src/applications/cmdNick.cpp \
 				src/applications/cmdUser.cpp \
@@ -14,7 +15,9 @@ SRC         = 	src/applications/CommandHandler.cpp\
 				src/applications/cmdPrivMsg.cpp \
 				src/applications/cmdKick.cpp \
 				src/applications/cmdInvite.cpp \
-				src/applications/cmdCap.cpp \
+				src/applications/cmdTopic.cpp \
+				src/applications/cmdMode.cpp \
+				src/applications/cmdQuit.cpp \
 				src/domain/entities/Channel.cpp \
 				src/domain/entities/Server.cpp \
 				src/domain/entities/User.cpp \
